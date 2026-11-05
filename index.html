@@ -307,8 +307,8 @@ let V={vista:"inicio",actual:null,buscar:"",hoja:null,dictado:"",preciosTexto:""
 try{const raw=localStorage.getItem(LS);if(raw){const p=JSON.parse(raw);if(p&&p.v===1&&Array.isArray(p.catalogo))S=p}}catch(e){}
 
 const LS_CONEX="alcolea-conexion";
-let conex=null;
-try{conex=JSON.parse(localStorage.getItem(LS_CONEX))}catch(e){}
+let conex={id:"AKfycbz1m4emyAZU75dQeSiN_9ugCgekosIhgBFGD5uywk11UlVASi4UzodP7I6H38a8J_Yw",clave:"zE0FgoWeJxVo5OdE36XtAowX8du9QZ4L"};
+try{const guardada=JSON.parse(localStorage.getItem(LS_CONEX));if(guardada&&guardada.id)conex=guardada}catch(e){}
 (()=>{const m=location.hash.match(/^#conectar=([\w-]+)\.([\w-]+)$/);if(!m)return;
   conex={id:m[1],clave:m[2]};
   try{localStorage.setItem(LS_CONEX,JSON.stringify(conex))}catch(e){}
