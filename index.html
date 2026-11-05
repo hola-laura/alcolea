@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Presupuestos Alcolea</title>
+<meta name="description" content="Presupuestos de instalaciones hablando con el móvil.">
+<meta name="theme-color" content="#DCEBFB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Alcolea">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Nunito:wght@700;800&display=swap">
+<style>
+/* Layout: una sola columna, una decisión por pantalla, botones de 64px mínimo y texto base de 19px para manos grandes y vista cansada. */
+:root{
+  --bg:#F3F7FB; --surface:#FFFFFF; --sunken:#E6EEF6; --hero:#DCEBFB; --line:#BFD0E0; --fg:#14283B; --muted:#44586B;
+  --pri:#1B63C6; --on-pri:#FFFFFF; --sol:#FFD95A; --on-sol:#14283B;
+  --ok:#14663F; --ok-bg:#D9F2E4; --warn:#7A4A00; --warn-bg:#FFEFC2; --bad:#9E2A21; --bad-bg:#FBE2DF; --info:#1B4F91; --info-bg:#DCEBFB;
+  --display:"Nunito","Trebuchet MS",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",Verdana,system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#101C28; --surface:#1A2B3B; --sunken:#132230; --hero:#1D3650; --line:#3A5166; --fg:#EEF4F9; --muted:#B5C6D5;
+  --pri:#8CC0FF; --on-pri:#0D2238; --sol:#FFD95A; --on-sol:#14283B;
+  --ok:#8BE0B5; --ok-bg:#173C2D; --warn:#FFD27A; --warn-bg:#3E3014; --bad:#F7A9A2; --bad-bg:#43211F; --info:#A9D0FF; --info-bg:#1D3650;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#101C28; --surface:#1A2B3B; --sunken:#132230; --hero:#1D3650; --line:#3A5166; --fg:#EEF4F9; --muted:#B5C6D5;
+  --pri:#8CC0FF; --on-pri:#0D2238; --sol:#FFD95A; --on-sol:#14283B;
+  --ok:#8BE0B5; --ok-bg:#173C2D; --warn:#FFD27A; --warn-bg:#3E3014; --bad:#F7A9A2; --bad-bg:#43211F; --info:#A9D0FF; --info-bg:#1D3650;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 19px/1.45 var(--body);-webkit-text-size-adjust:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance;font-weight:800}
+h1{font-size:2.05rem}
+h2{font-size:1.55rem}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:4px solid var(--pri);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.marca{display:flex;align-items:center;gap:10px;padding-block:12px 4px}
+.marca b{font:800 1.35rem/1 var(--display)}
+.hero{background:var(--hero)}
+.hero-in{padding-block:6px 20px;display:flex;flex-direction:column;gap:14px}
+.pasos{display:flex;flex-direction:column;gap:6px;font-size:1.02rem;margin:0;padding:0;list-style:none}
+.pasos li{display:flex;gap:10px;align-items:center}
+.pasos i{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pri);color:var(--on-pri);font:800 1rem/30px var(--display);text-align:center}
+.pasos svg{vertical-align:-3px}
+textarea{width:100%;min-height:140px;border:2px solid var(--line);border-radius:16px;background:var(--surface);color:var(--fg);padding:14px;font-size:1.15rem;line-height:1.4;resize:vertical}
+textarea::placeholder,input::placeholder{color:var(--muted)}
+.mic-zona{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-weight:700;font-size:1.1rem}
+.mic{width:124px;height:124px;border-radius:50%;border:0;background:var(--pri);color:var(--on-pri);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(27,99,198,.32)}
+.mic.oyendo{background:var(--bad);color:var(--bg)}
+@media (prefers-reduced-motion:no-preference){.mic.oyendo{animation:late 1.2s ease-in-out infinite}@keyframes late{50%{transform:scale(1.07)}}}
+textarea#dictado{min-height:104px}
+.btn{min-height:64px;padding:12px 18px;border-radius:16px;border:2px solid var(--line);background:var(--surface);color:var(--fg);font-weight:700;font-size:1.08rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;text-align:center;width:100%}
+.btn:hover{border-color:var(--pri)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--on-pri);font-size:1.2rem;min-height:72px}
+.btn.borrar{color:var(--bad)}
+.enlace{all:unset;cursor:pointer;text-decoration:underline;font-weight:700;padding:12px 4px;text-align:center}
+.enlace:focus-visible{outline:4px solid var(--pri)}
+.aviso{padding:14px 16px;border-radius:14px;background:var(--info-bg);color:var(--info)}
+.aviso.warn{background:var(--warn-bg);color:var(--warn)}
+.aviso.bad{background:var(--bad-bg);color:var(--bad)}
+main{padding-block:20px 112px}
+.pila{display:flex;flex-direction:column;gap:18px}
+.seccion{display:flex;flex-direction:column;gap:12px}
+.tarjetas{display:flex;flex-direction:column;gap:10px}
+.pres{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;padding:16px;background:var(--surface);border:2px solid var(--line);border-radius:16px;cursor:pointer;width:100%}
+.pres:focus-visible{outline:4px solid var(--pri)}
+.pres .a{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.pres b{font-size:1.15rem;overflow-wrap:anywhere}
+.pres .imp{font:800 1.45rem/1.1 var(--display)}
+.pres small{color:var(--muted);font-size:1rem;overflow-wrap:anywhere}
+.pill{font-size:.95rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.st-borrador{background:var(--sunken);color:var(--muted)}
+.st-enviado{background:var(--info-bg);color:var(--info)}
+.st-aceptado{background:var(--ok-bg);color:var(--ok)}
+.st-rechazado{background:var(--bad-bg);color:var(--bad)}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.nav-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr)}
+.nav button{all:unset;box-sizing:border-box;display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;min-height:76px;font-weight:700;font-size:.95rem;color:var(--muted);cursor:pointer;text-align:center}
+.nav button[aria-current="page"]{color:var(--pri);background:var(--hero)}
+.nav button:focus-visible{outline:4px solid var(--pri);outline-offset:-4px}
+.top{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.volver{all:unset;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px;min-height:60px;padding-right:12px}
+.volver:focus-visible{outline:4px solid var(--pri)}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700;min-width:0}
+input,select{min-height:62px;width:100%;min-width:0;border:2px solid var(--line);border-radius:14px;background:var(--surface);padding:10px 14px;font-weight:400;color:var(--fg);font-size:1.15rem}
+.linea{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.linea.sin{border-color:var(--warn)}
+.linea .t{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.linea .t b{font-size:1.1rem;overflow-wrap:anywhere;min-width:0}
+.linea .imp{font-weight:700;white-space:nowrap}
+.pasador{display:grid;grid-template-columns:68px minmax(0,1fr) 68px;gap:8px;align-items:center}
+.pasador button{min-height:62px;border-radius:14px;border:2px solid var(--line);background:var(--sunken);font:800 1.9rem/1 var(--display);cursor:pointer;padding:0}
+.pasador span{text-align:center;font-weight:700;font-size:1.15rem}
+.falta{color:var(--warn);font-weight:700}
+.dos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.total{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--surface);border-top:2px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.total-in{padding-block:10px;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:14px}
+.total small{display:block;color:var(--muted);font-size:.95rem}
+.total strong{font:800 1.6rem/1.05 var(--display);white-space:nowrap}
+.total .btn{min-height:64px}
+.hoja{background:#fff;color:#14283B;border:2px solid var(--line);border-radius:12px;padding:18px 14px;display:flex;flex-direction:column;gap:14px;font-size:1rem;overflow-wrap:break-word}
+.hoja header{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hoja h3{font-size:1.5rem}
+.hoja table{width:100%;border-collapse:collapse}
+.hoja th{text-align:left;font-size:.85rem;color:#44586B;border-bottom:2px solid #1B63C6;padding:4px}
+.hoja td{padding:8px 4px;border-bottom:1px solid #DCE5ED;vertical-align:top}
+.hoja .d{text-align:right;white-space:nowrap}
+.hoja .suma{margin-left:auto;width:min(100%,260px)}
+.hoja .suma div{display:flex;justify-content:space-between;padding:3px 0}
+.hoja .suma .g{font-weight:700;font-size:1.3rem;border-top:2px solid #1B63C6;padding-top:6px}
+.tabla-scroll{overflow-x:auto}
+.estado{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.estado button{min-height:64px;border:2px solid var(--line);background:var(--surface);border-radius:14px;cursor:pointer;font-weight:700}
+.estado button[aria-pressed="true"]{background:var(--pri);border-color:var(--pri);color:var(--on-pri)}
+.precio{display:grid;grid-template-columns:minmax(0,1fr) 124px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.precio .n{min-width:0;overflow-wrap:anywhere;font-weight:700}
+.precio small{display:block;color:var(--muted);font-weight:400}
+.cat{font:800 1.2rem/1 var(--display);padding-top:14px}
+details{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:0 14px}
+summary{cursor:pointer;font-weight:700;display:flex;justify-content:space-between;gap:10px;min-height:62px;align-items:center}
+details[open]{padding-bottom:14px}
+.comp{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:10px;align-items:center;padding-top:10px}
+.cambio{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.sheet-fondo{position:fixed;inset:0;background:rgba(10,20,30,.55);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:88%;overflow:auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-radius:20px 20px 0 0;display:flex;flex-direction:column;gap:12px}
+.opcion{all:unset;box-sizing:border-box;display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:68px;padding:10px 14px;background:var(--surface);border:2px solid var(--line);border-radius:14px;cursor:pointer;width:100%;margin-top:8px;font-weight:700}
+.opcion span+span{font-weight:400;white-space:nowrap}
+.opcion:focus-visible{outline:4px solid var(--pri)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(100px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:14px;max-width:calc(100% - 32px)}
+</style>
+
+</head>
+<body>
+<div id="app"></div>
+
+<script src="jspdf.umd.min.js"></script>
+<script>
+/*LOGIC-START*/
+const CATS=["Mano de obra","Fontanería","Calefacción y gas","Climatización","Electricidad","Albañilería"];
+const ITEMS_BASE=[
+ ["oficial","Mano de obra","Hora de oficial","h",34,"oficial|\\bhoras?\\b(?! de ayudante)"],
+ ["ayudante","Mano de obra","Hora de ayudante","h",24,"ayudante"],
+ ["desp","Mano de obra","Desplazamiento","ud",25,"desplazamiento"],
+ ["urgencia","Mano de obra","Recargo por urgencia","ud",40,"urgencia|urgente"],
+ ["retirada","Mano de obra","Retirada de equipo antiguo","ud",45,"retirada|retirar"],
+ ["multicapa","Fontanería","Tubería multicapa 20 mm","m",6.4,"multicapa|tuberias?\\b(?! de (cobre|pvc))"],
+ ["cobre","Fontanería","Tubería de cobre 15 mm","m",9.8,"cobre"],
+ ["pvc","Fontanería","Tubería de PVC 40 mm","m",5.2,"pvc|desague de tuberia"],
+ ["llave","Fontanería","Llave de corte","ud",11.5,"llaves? de corte|llaves? de paso"],
+ ["grifolav","Fontanería","Grifo de lavabo","ud",68,"grifos?\\b(?! de(l)? (fregadero|cocina|ducha))"],
+ ["grifofre","Fontanería","Grifo de fregadero","ud",79,"grifos? de(l)? (fregadero|cocina)"],
+ ["grifoduc","Fontanería","Grifo termostático de ducha","ud",135,"grifos? de(l)? ducha"],
+ ["inodoro","Fontanería","Inodoro completo","ud",195,"inodoros?|vater|water"],
+ ["plato","Fontanería","Plato de ducha 120 x 70","ud",240,"plato de ducha"],
+ ["termo","Fontanería","Termo eléctrico 50 l","ud",229,"\\btermos?\\b"],
+ ["caldera","Calefacción y gas","Caldera de condensación 24 kW","ud",1290,"calderas?"],
+ ["humos","Calefacción y gas","Kit de evacuación de humos","ud",85,"humos|evacuacion"],
+ ["termostato","Calefacción y gas","Termostato programable","ud",89,"termostatos?"],
+ ["radiador","Calefacción y gas","Radiador de aluminio","ud",118,"radiador(es)?"],
+ ["valvula","Calefacción y gas","Válvula de radiador","ud",19.5,"valvulas?"],
+ ["marcha","Calefacción y gas","Puesta en marcha y certificado","ud",75,"puesta en marcha|certificado"],
+ ["split","Climatización","Aire acondicionado split 3.000 frigorías","ud",640,"aire acondicionado|\\bsplits?\\b|\\baires?\\b"],
+ ["frigorifica","Climatización","Línea frigorífica","m",28,"linea frigorifica"],
+ ["soporte","Climatización","Soporte de unidad exterior","ud",38,"soporte"],
+ ["condensados","Climatización","Desagüe de condensados","m",7.5,"condensados"],
+ ["enchufe","Electricidad","Punto de enchufe","ud",42,"enchufes?"],
+ ["luz","Electricidad","Punto de luz","ud",38,"puntos? de luz"],
+ ["cuadro","Electricidad","Cuadro eléctrico de vivienda","ud",185,"cuadro"],
+ ["cable","Electricidad","Cable de 2,5 mm²","m",1.9,"cable"],
+ ["alicatado","Albañilería","Alicatado","m²",38,"alicatad[oa]|azulejos?"],
+ ["solado","Albañilería","Solado","m²",34,"solado|suelo"],
+ ["tabique","Albañilería","Tabique de ladrillo","m²",42,"tabiques?"],
+ ["pintura","Albañilería","Pintura","m²",11,"pintura|pintar"],
+ ["mortero","Albañilería","Mortero y material de agarre","ud",18,"mortero|cemento"],
+ ["escombro","Albañilería","Saco de escombro retirado","saco",9,"escombro"]
+];
+const TRABAJOS_BASE=[
+ {id:"t-caldera",nombre:"Cambiar caldera",claves:"calderas?",comp:[["caldera",1],["humos",1],["llave",2],["multicapa",3],["oficial",8],["marcha",1],["retirada",1],["desp",1]]},
+ {id:"t-aire",nombre:"Instalar aire acondicionado",claves:"aire acondicionado|\\bsplits?\\b",comp:[["split",1],["frigorifica",4],["soporte",1],["condensados",3],["oficial",6],["desp",1]]},
+ {id:"t-fuga",nombre:"Reparar fuga",claves:"\\bfugas?\\b|gotera",comp:[["multicapa",1],["llave",1],["mortero",1],["oficial",3],["desp",1]]},
+ {id:"t-bano",nombre:"Reformar baño",claves:"(reforma|reformar|obra)( de| del| el| en el)? bano",comp:[["plato",1],["inodoro",1],["grifolav",1],["grifoduc",1],["alicatado",18],["solado",4],["multicapa",12],["pvc",4],["escombro",12],["oficial",40],["ayudante",24],["desp",3]]},
+ {id:"t-termo",nombre:"Cambiar termo",claves:"\\btermos?\\b",comp:[["termo",1],["llave",1],["oficial",3],["retirada",1],["desp",1]]},
+ {id:"t-grifo",nombre:"Cambiar grifo",claves:"\\bgrifos?\\b",comp:[["oficial",1],["desp",1]]},
+ {id:"t-radiador",nombre:"Instalar radiador",claves:"radiador(es)?",comp:[["radiador",1],["valvula",2],["multicapa",4],["oficial",4],["desp",1]]}
+];
+function norm(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")}
+const PALABRAS={un:1,una:1,uno:1,dos:2,tres:3,cuatro:4,cinco:5,seis:6,siete:7,ocho:8,nueve:9,diez:10,once:11,doce:12,trece:13,catorce:14,quince:15,dieciseis:16,dieciocho:18,veinte:20,veinticinco:25,treinta:30,cuarenta:40,cincuenta:50,sesenta:60,cien:100};
+function conNumeros(t){return t.replace(/\b[a-z]+\b/g,w=>PALABRAS[w]!==undefined?String(PALABRAS[w]):w)}
+function aNumero(s){return Number(String(s).replace(",","."))}
+function redondea(n){return Math.round(n*100)/100}
+function crearCatalogo(){return ITEMS_BASE.map(([id,cat,nombre,unidad,precio,claves])=>({id,cat,nombre,unidad,precio,claves}))}
+function crearTrabajos(){return TRABAJOS_BASE.map(t=>({...t,comp:t.comp.map(c=>[...c])}))}
+function lineaDe(item,cantidad){return{id:item.id,nombre:item.nombre,unidad:item.unidad,cantidad,precio:item.precio}}
+function re(c){try{return new RegExp(c)}catch(e){return /$^/}}
+function interpretarLocal(texto,catalogo,trabajos){
+  const t=conNumeros(norm(texto));
+  const lineas=[];const porId=id=>lineas.find(l=>l.id===id);
+  const item=id=>catalogo.find(i=>i.id===id);
+  const pon=(id,c)=>{const i=item(id);if(!i)return;const l=porId(id);if(l)l.cantidad=c;else lineas.push(lineaDe(i,c))};
+  const encontrados=[];
+  for(const tr of trabajos){if(tr.claves&&re(tr.claves).test(t)){encontrados.push(tr.nombre);for(const[id,c]of tr.comp){const l=porId(id);if(l)l.cantidad=redondea(l.cantidad+(id==="desp"?0:c));else pon(id,c)}}}
+  for(const i of catalogo){
+    if(!i.claves||i.id==="oficial"||i.id==="ayudante")continue;
+    const fuente=i.claves;
+    const conCant=new RegExp("(\\d+(?:[.,]\\d+)?)\\s*(?:m2|metros? cuadrados?|metros?|mts?|m|unidades|uds?|puntos?|sacos?)?\\s*(?:de\\s+)?(?:(?:nuev[oa]s?|[a-z]+)\\s+)?(?:"+fuente+")");
+    const m=t.match(conCant);
+    if(m&&!/horas?$/.test(t.slice(0,m.index+m[1].length+6))){pon(i.id,aNumero(m[1]))}
+    else if(re(fuente).test(t)&&!porId(i.id))pon(i.id,1);
+  }
+  const dias=t.match(/(\d+(?:[.,]\d+)?)\s*dias?\b/);
+  if(/medio dia/.test(t))pon("oficial",4);
+  if(dias)pon("oficial",aNumero(dias[1])*8);
+  const hAy=t.match(/(\d+(?:[.,]\d+)?)\s*horas?\s*de\s*ayudante/);
+  const hOf=t.replace(/(\d+(?:[.,]\d+)?)\s*horas?\s*de\s*ayudante/,"").match(/(\d+(?:[.,]\d+)?)\s*horas?(\s*y\s*media)?/);
+  if(hOf)pon("oficial",aNumero(hOf[1])+(hOf[2]?.5:0));
+  if(hAy)pon("ayudante",aNumero(hAy[1]));
+  else if(/con (1 )?ayudante/.test(t)){const o=porId("oficial");pon("ayudante",o?o.cantidad:8)}
+  if(lineas.length&&!porId("desp"))pon("desp",1);
+  if(lineas.length&&!porId("oficial"))pon("oficial",2);
+  return{titulo:encontrados[0]||"",cliente:leerCliente(texto),lineas,dudas:[]};
+}
+function leerCliente(texto){
+  const nombre=(texto.match(/(?:[Pp]ara|[Cc]liente:?)\s+(?:(?:la|el|don|doña|señora|señor|sr\.?|sra\.?)\s+)*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)?)/)||[])[1]||"";
+  const direccion=(texto.match(/\b((?:calle|c\/|avenida|avda\.?|plaza|paseo|camino)\s+[^,.;]+?\d*)(?=\s*[,.;]|\s+(?:para|con|son|y)\s|$)/i)||[])[1]||"";
+  const tel=(texto.replace(/\s/g,"").match(/(?:\+34)?[6789]\d{8}/)||[])[0]||"";
+  return{nombre,direccion,telefono:tel};
+}
+function buscarItem(seg,catalogo){
+  const s=conNumeros(norm(seg));
+  const hits=catalogo.filter(i=>i.claves&&re(i.claves).test(s));
+  if(hits.length){return hits.sort((a,b)=>(s.includes(norm(b.nombre))?1:0)-(s.includes(norm(a.nombre))?1:0))[0]}
+  return catalogo.find(i=>norm(i.nombre).split(/\s+/).some(w=>w.length>4&&s.includes(w)));
+}
+function interpretarPrecios(texto,catalogo){
+  const cambios=[];const nuevos=[];
+  const t0=conNumeros(norm(texto));
+  const global=t0.match(/(sube|subir|aumenta|aumentar|baja|bajar|reduce|reducir)\s+(?:todo|todos los precios|los precios)\s+(?:(?:un|1)\s+)?(\d+(?:[.,]\d+)?)\s*(?:%|por ciento)/);
+  if(global){const signo=/^(sub|aum)/.test(global[1])?1:-1;const f=1+signo*aNumero(global[2])/100;
+    for(const i of catalogo)cambios.push({id:i.id,nombre:i.nombre,antes:i.precio,despues:redondea(i.precio*f)});
+    return{cambios,nuevos}}
+  for(const seg of t0.split(/;|\s+y\s+|,\s+|\.\s+/)){
+    if(!seg.trim())continue;
+    const pct=seg.match(/(\d+(?:[.,]\d+)?)\s*(?:%|por ciento)/);
+    const eur=seg.match(/(?:\ba|\ben|\bpor|\bson|\bcuesta|\bvale)\s+(\d+(?:[.,]\d+)?)(?:\s*(?:euros?|€|con (\d+)))?/);
+    const esNuevo=/^\s*(anade|anadir|nuevo|nueva|crea|mete|agrega)\b/.test(seg);
+    if(esNuevo&&eur){
+      const nombre=seg.replace(/^\s*(anade|anadir|nuevo|nueva|crea|mete|agrega)\s+(el |la |un |1 |una )?(precio de |precio )?/,"").split(/\s+(?:a|en|por|son|cuesta|vale)\s+\d/)[0].trim();
+      nuevos.push({nombre:nombre.charAt(0).toUpperCase()+nombre.slice(1),unidad:/metro/.test(seg)?"m":/hora/.test(seg)?"h":"ud",precio:aNumero(eur[1])});
+      continue;
+    }
+    const it=buscarItem(seg,catalogo);if(!it)continue;
+    if(pct){const baja=/(baja|bajar|reduce|reducir|quita|descuenta)/.test(seg);const f=1+(baja?-1:1)*aNumero(pct[1])/100;cambios.push({id:it.id,nombre:it.nombre,antes:it.precio,despues:redondea(it.precio*f)})}
+    else if(eur){cambios.push({id:it.id,nombre:it.nombre,antes:it.precio,despues:redondea(aNumero(eur[1])+(eur[2]?aNumero(eur[2])/100:0))})}
+  }
+  return{cambios,nuevos};
+}
+function totales(q){
+  const base=redondea(q.lineas.reduce((s,l)=>s+(Number(l.cantidad)||0)*(Number(l.precio)||0),0));
+  const iva=redondea(base*(Number(q.iva)||0)/100);
+  return{base,iva,total:redondea(base+iva),faltan:q.lineas.filter(l=>l.precio===null||l.precio===""||!isFinite(Number(l.precio))).length};
+}
+function euros(n){
+  const neg=n<0;const[e,d]=Math.abs(Number(n)||0).toFixed(2).split(".");
+  return(neg?"-":"")+e.replace(/\B(?=(\d{3})+(?!\d))/g,".")+","+d+" €";
+}
+/*LOGIC-END*/
+
+const LS="alcolea-v1";
+const HOY=()=>new Date().toISOString().slice(0,10);
+const fecha=d=>{const[a,m,dd]=d.split("-");return dd+"/"+m+"/"+a};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=s=>document.querySelector(s);
+const ESTADOS=[["borrador","Borrador"],["enviado","Enviado"],["aceptado","Aceptado"],["rechazado","Rechazado"]];
+const EJEMPLOS=[
+ "Para Marta Gil, cambiar caldera en calle Oca 14, dos días con ayudante, 6 metros de tubería",
+ "Reparar fuga en la cocina para Luis Prieto, calle Laguna 8, tres horas",
+ "Reforma de baño para Ana Torres, 20 metros de alicatado"
+];
+function ejemploInicial(cat,tra){
+  const hazQ=(tr,o)=>({id:uid(),num:o.num,titulo:tr.nombre,cliente:o.cliente,fecha:o.fecha,estado:o.estado,iva:21,ejemplo:true,
+    lineas:tr.comp.map(([id,c])=>lineaDe(cat.find(i=>i.id===id),c))});
+  return[
+   hazQ(tra[0],{num:"2026-003",cliente:{nombre:"Carmen Ruiz (ejemplo)",direccion:"Calle de ejemplo 12, Madrid",telefono:""},fecha:"2026-11-04",estado:"enviado"}),
+   hazQ(tra[2],{num:"2026-002",cliente:{nombre:"Javier Mora (ejemplo)",direccion:"Avenida de ejemplo 3, Madrid",telefono:""},fecha:"2026-11-02",estado:"aceptado"}),
+   hazQ(tra[1],{num:"2026-001",cliente:{nombre:"Lucía Ortega (ejemplo)",direccion:"Plaza de ejemplo 5, Madrid",telefono:""},fecha:"2026-10-29",estado:"rechazado"})
+  ];
+}
+function estadoInicial(){
+  const catalogo=crearCatalogo(),trabajos=crearTrabajos();
+  return{v:1,updatedAt:0,catalogo,trabajos,quotes:ejemploInicial(catalogo,trabajos),
+    negocio:{nombre:"Instalaciones Alcolea",titular:"",nif:"",telefono:"",email:"",direccion:"Madrid",iva:21,validez:30,condiciones:"Forma de pago: 50 % al aceptar y 50 % al terminar. Cualquier trabajo no incluido se presupuestará aparte."}}
+}
+let S=estadoInicial();
+let V={vista:"inicio",actual:null,buscar:"",hoja:null,dictado:"",preciosTexto:"",propuesta:null,nota:null,confirma:null,reset:false,abierta:null,ejemplo:0,subiendo:false};
+
+try{const raw=localStorage.getItem(LS);if(raw){const p=JSON.parse(raw);if(p&&p.v===1&&Array.isArray(p.catalogo))S=p}}catch(e){}
+
+function guardar(){
+  S.updatedAt=Date.now();
+  try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("No se ha podido guardar en este móvil")}
+}
+function toast(t){
+  document.querySelectorAll(".toast").forEach(n=>n.remove());
+  const n=document.createElement("div");n.className="toast";n.setAttribute("role","status");n.textContent=t;document.body.append(n);setTimeout(()=>n.remove(),2600);
+}
+const Q=()=>S.quotes.find(q=>q.id===V.actual);
+function siguienteNum(){
+  const a=new Date().getFullYear();
+  const max=S.quotes.reduce((m,q)=>{const x=String(q.num).match(/^(\d{4})-(\d+)$/);return x&&+x[1]===a?Math.max(m,+x[2]):m},0);
+  return a+"-"+String(max+1).padStart(3,"0");
+}
+function nuevoQ(datos={}){
+  const q={id:uid(),num:siguienteNum(),titulo:datos.titulo||"",cliente:{nombre:"",direccion:"",telefono:"",...(datos.cliente||{})},fecha:HOY(),estado:"borrador",iva:S.negocio.iva,lineas:datos.lineas||[],dudas:datos.dudas||[]};
+  S.quotes.unshift(q);V.actual=q.id;V.vista="editor";guardar();render();window.scrollTo(0,0);
+}
+
+const LOGO=(t=38)=>`<svg width="${t}" height="${t}" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="#FFD95A"/><path d="M11 29 20 11l9 18" fill="none" stroke="#14283B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 24h10" stroke="#14283B" stroke-width="4" stroke-linecap="round"/></svg>`;
+const MIC_G=`<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
+const MIC=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
+const ICON={inicio:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>',precios:'<path d="M12 3v18M17 7c-1-2-8-3-9 1s9 3 9 8-9 4-10 1"/>',negocio:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>'};
+const icono=k=>`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+
+function render(){
+  const app=$("#app");
+  const pos=window.scrollY;
+  app.innerHTML=V.vista==="editor"?vEditor():V.vista==="vista"?vVista():V.vista==="precios"?vPrecios():V.vista==="negocio"?vNegocio():vInicio();
+  if(V.hoja)app.insertAdjacentHTML("beforeend",vHoja());
+  window.scrollTo(0,pos);
+}
+function marca(){return `<div class="marca">${LOGO()}<b>Alcolea</b></div>`}
+function nav(){
+  const b=(k,t)=>`<button data-go="${k}" ${V.vista===k?'aria-current="page"':""}>${icono(k)}${t}</button>`;
+  return `<nav class="nav" aria-label="Secciones"><div class="nav-in">${b("inicio","Presupuestos")}${b("precios","Precios")}${b("negocio","Mis datos")}</div></nav>`;
+}
+function nota(){return V.nota?`<p class="aviso ${V.nota.tipo||""}" role="status">${esc(V.nota.t)}</p>`:""}
+function vInicio(){
+  const filas=S.quotes.map(q=>{const t=totales(q);const st=ESTADOS.find(e=>e[0]===q.estado);
+    return `<button class="pres" data-abrir="${q.id}"><span class="a"><b>${esc(q.cliente.nombre||"Sin cliente")}</b><span class="imp num">${euros(t.total)}</span></span><small>${esc(q.titulo||"Presupuesto")}</small><span class="a"><small>${fecha(q.fecha)}</small><span class="pill st-${q.estado}">${st[1]}</span></span></button>`}).join("");
+  return `<div class="hero"><div class="wrap hero-in">${marca()}
+    <h1>Hola, ¿qué trabajo tienes?</h1>
+    ${botonMic("dictado")}
+    <textarea id="dictado" aria-label="Lo que has contado" placeholder="Aquí saldrá lo que digas">${esc(V.dictado)}</textarea>
+    <button class="btn pri " data-accion="preparar" >Hacer presupuesto</button>
+    <button class="enlace" data-accion="ejemplo">Probar con un ejemplo</button>
+  </div></div><main class="wrap pila">${nota()}
+    <button class="btn" data-accion="mano">Hacerlo a mano</button>
+    <section class="seccion"><h2>Mis presupuestos</h2><div class="tarjetas">${filas||'<p>Aún no hay presupuestos.</p>'}</div></section>
+  </main>${nav()}`;
+}
+const CANT={h:["hora","horas"],m:["metro","metros"],saco:["saco","sacos"],ud:["unidad","unidades"]};
+function cantidadTexto(l){const c=Number(l.cantidad)||0;const u=CANT[l.unidad];return String(c).replace(".",",")+" "+(u?(c===1?u[0]:u[1]):l.unidad)}
+function vEditor(){
+  const q=Q();if(!q){V.vista="inicio";return vInicio()}
+  const t=totales(q);
+  const clientes=[...new Set(S.quotes.map(x=>x.cliente.nombre).filter(Boolean))];
+  const lineas=q.lineas.map((l,i)=>{const sin=l.precio===null||l.precio==="";const ab=V.abierta===i||sin;
+    return `<div class="linea ${sin?"sin":""}" data-i="${i}"><div class="t"><b>${esc(l.nombre||"Sin nombre")}</b><span class="imp num" id="imp-${i}">${sin?"":euros(l.cantidad*l.precio)}</span></div>
+    <span class="falta" id="falta-${i}" ${sin?"":"hidden"}>Falta el precio</span>
+    <div class="pasador"><button data-menos="${i}" aria-label="Quitar uno">−</button><span id="cant-${i}" class="num">${esc(cantidadTexto(l))}</span><button data-mas="${i}" aria-label="Añadir uno">+</button></div>
+    ${ab?`<label>Qué es<input id="l-n-${i}" data-c="nombre" value="${esc(l.nombre)}"></label>
+    <div class="dos"><label>Cantidad<input id="l-c-${i}" data-c="cantidad" inputmode="decimal" value="${esc(String(l.cantidad).replace(".",","))}"></label>
+    <label>Precio (€)<input id="l-p-${i}" data-c="precio" inputmode="decimal" value="${sin?"":esc(String(l.precio).replace(".",","))}"></label></div>
+    <div class="dos"><button class="btn" data-cerrarl="1">Listo</button><button class="btn borrar" data-quitar="${i}">Quitar</button></div>`
+    :`<button class="btn" data-editarl="${i}">Cambiar precio o nombre</button>`}</div>`}).join("");
+  return `<main class="wrap pila" style="padding-block:6px 128px"><button class="volver" data-go="inicio">← Volver</button>
+    <h1>${esc(q.titulo||"Nuevo presupuesto")}</h1>
+    ${q.ejemplo?'<p class="aviso">Este presupuesto es de ejemplo.</p>':""}
+    ${(q.dudas&&q.dudas.length)?`<div class="aviso warn"><b>Revisa esto:</b> ${q.dudas.map(esc).join(" · ")}</div>`:""}
+    ${nota()}
+    <section class="seccion"><h2>¿Para quién es?</h2>
+      <label>Nombre<input id="c-nombre" data-cl="nombre" list="clientes" value="${esc(q.cliente.nombre)}" autocomplete="off"></label>
+      <label>Teléfono<input id="c-telefono" data-cl="telefono" inputmode="tel" value="${esc(q.cliente.telefono)}"></label>
+      <label>Dirección<input id="c-direccion" data-cl="direccion" value="${esc(q.cliente.direccion)}"></label>
+      <datalist id="clientes">${clientes.map(c=>`<option value="${esc(c)}"></option>`).join("")}</datalist>
+    </section>
+    <section class="seccion"><h2>¿Qué incluye?</h2>
+      ${lineas||'<p>Todavía nada. Pulsa el botón para añadir algo.</p>'}
+      <button class="btn" data-accion="anadir">+ Añadir algo</button>
+      <button class="enlace" data-accion="libre">No está en la lista, lo escribo yo</button>
+    </section>
+    <section class="seccion"><h2>¿Cómo va?</h2><div class="estado" role="group" aria-label="Estado del presupuesto">${ESTADOS.map(([k,n])=>`<button data-estado="${k}" aria-pressed="${q.estado===k}">${n}</button>`).join("")}</div></section>
+    <details ${V.confirma?"open":""}><summary>Más opciones</summary><div class="pila" style="gap:12px">
+      <label>Nombre del trabajo<input id="q-titulo" data-q="titulo" value="${esc(q.titulo)}"></label>
+      <label>IVA<select id="q-iva" data-q="iva">${[21,10,0].map(v=>`<option value="${v}" ${+q.iva===v?"selected":""}>${v} %</option>`).join("")}</select></label>
+      <button class="btn" data-accion="duplicar">Hacer una copia</button>
+      ${V.confirma==="borrarQ"?'<div class="dos"><button class="btn borrar" data-accion="borrarOk">Sí, borrar</button><button class="btn" data-accion="noBorrar">No</button></div>':'<button class="btn borrar" data-accion="borrarQ">Borrar presupuesto</button>'}
+    </div></details>
+  </main>
+  <div class="total"><div class="wrap total-in"><div><small>Total con IVA</small><strong class="num" id="t-total">${euros(t.total)}</strong></div><button class="btn pri" data-accion="ver">Enviar</button></div></div>`;
+}
+function hojaHTML(q){
+  const n=S.negocio,t=totales(q);
+  const v=new Date(q.fecha);v.setDate(v.getDate()+(+n.validez||30));
+  return `<article class="hoja" aria-label="Así verá el cliente el presupuesto"><header><div style="display:flex;gap:10px;align-items:center">${LOGO(44)}<div><h3>Alcolea</h3><div>${esc(n.nombre)}</div></div></div>
+  <div><b>Presupuesto ${esc(q.num)}</b><div>${fecha(q.fecha)}</div><div>Válido hasta ${fecha(v.toISOString().slice(0,10))}</div></div></header>
+  <div><b>Para:</b> ${esc(q.cliente.nombre||"Cliente")}<br>${esc(q.cliente.direccion)}${q.titulo?`<br><b>Trabajo:</b> ${esc(q.titulo)}`:""}</div>
+  <div class="tabla-scroll"><table><thead><tr><th>Concepto</th><th class="d">Cant.</th><th class="d">Importe</th></tr></thead><tbody>
+  ${q.lineas.map(l=>`<tr><td>${esc(l.nombre)}</td><td class="d num">${esc(String(l.cantidad).replace(".",","))} ${esc(l.unidad)}</td><td class="d num">${l.precio===null?"—":euros(l.cantidad*l.precio)}</td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="suma num"><div><span>Sin IVA</span><span>${euros(t.base)}</span></div><div><span>IVA ${q.iva} %</span><span>${euros(t.iva)}</span></div><div class="g"><span>Total</span><span>${euros(t.total)}</span></div></div>
+  <p style="font-size:.9rem;color:#44586B">${esc(n.condiciones)}</p></article>`;
+}
+function mensajeWA(q){
+  const t=totales(q);
+  const nombre=q.cliente.nombre?" "+q.cliente.nombre.replace(/\s*\(ejemplo\)/,"").split(" ")[0]:"";
+  return `Hola${nombre}, soy ${S.negocio.titular||"Alcolea"}. Te paso el presupuesto ${q.num}${q.titulo?" de "+q.titulo.toLowerCase():""}: ${euros(t.total)} con IVA. Te adjunto el PDF con el detalle. Cualquier duda, me dices.`;
+}
+function urlWA(q){
+  let d=String(q.cliente.telefono||"").replace(/\D/g,"");
+  if(d.length===9)d="34"+d;
+  return "https://wa.me/"+d+"?text="+encodeURIComponent(mensajeWA(q));
+}
+function vVista(){
+  const q=Q();if(!q){V.vista="inicio";return vInicio()}
+  const t=totales(q);const bloqueado=t.faltan>0||!q.lineas.length;
+  return `<main class="wrap pila" style="padding-block:6px 32px"><button class="volver" data-accion="editar">← Volver a cambiarlo</button>
+  <h1>Así lo verá el cliente</h1>
+  ${bloqueado?`<p class="aviso warn">${q.lineas.length?`Falta ${t.faltan===1?"1 precio":t.faltan+" precios"}. Vuelve atrás y escríbelo.`:"Añade algo al presupuesto antes de enviarlo."}</p>`:""}
+  ${nota()}
+  ${hojaHTML(q)}
+  <div class="pila" style="gap:10px">
+    <h2>Para enviarlo</h2>
+    <p>Pulsa el botón y elige WhatsApp. El PDF ya va adjunto.</p>
+    <button class="btn pri" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar por WhatsApp</button>
+    <button class="enlace" data-accion="pdf" ${bloqueado?"disabled":""}>Guardar PDF en el móvil</button>
+    <button class="enlace" data-accion="copiar">Copiar el mensaje</button>
+  </div></main>`;
+}
+function vHoja(){
+  const b=norm(V.buscar);
+  const ts=S.trabajos.filter(t=>!b||norm(t.nombre).includes(b));
+  const is=S.catalogo.filter(i=>!b||norm(i.nombre).includes(b));
+  return `<div class="sheet-fondo" data-cerrar="1"><div class="sheet" role="dialog" aria-label="Añadir algo">
+   <div class="top"><h2>¿Qué añades?</h2><button class="volver" data-accion="cerrar">Cerrar</button></div>
+   <label>Buscar<input id="h-buscar" value="${esc(V.buscar)}"></label>
+   <div id="h-res">${resHoja(ts,is)}</div></div></div>`;
+}
+function resHoja(ts,is){
+  return (ts.length?'<div class="cat">Trabajos</div>':"")+ts.map(t=>`<button class="opcion" data-addt="${t.id}"><span>${esc(t.nombre)}</span><span class="num">${euros(precioTrabajo(t))}</span></button>`).join("")
+   +(is.length?'<div class="cat">Materiales y horas</div>':"")+is.map(i=>`<button class="opcion" data-addi="${i.id}"><span>${esc(i.nombre)}</span><span class="num">${euros(i.precio)}</span></button>`).join("");
+}
+function precioTrabajo(t){return redondea(t.comp.reduce((s,[id,c])=>{const i=S.catalogo.find(x=>x.id===id);return s+(i?i.precio*c:0)},0))}
+function vPrecios(){
+  const b=norm(V.buscar);
+  const grupos=[...CATS,...new Set(S.catalogo.map(i=>i.cat).filter(c=>!CATS.includes(c)))].map(c=>{
+    const it=S.catalogo.filter(i=>i.cat===c&&(!b||norm(i.nombre).includes(b)));
+    if(!it.length)return"";
+    return `<div class="cat">${esc(c)}</div>`+it.map(i=>`<div class="precio"><div class="n">${esc(i.nombre)}<small>por ${esc((CANT[i.unidad]||[i.unidad])[0])}</small></div><input id="p-${i.id}" data-precio="${i.id}" inputmode="decimal" aria-label="Precio de ${esc(i.nombre)} en euros" class="num" style="text-align:right" value="${esc(String(i.precio).replace(".",","))}"></div>`).join("")}).join("");
+  const prop=V.propuesta;
+  const propH=prop?`<div class="seccion aviso" style="background:var(--surface);color:var(--fg);border:2px solid var(--pri)"><h2>¿Está bien así?</h2>
+    ${prop.cambios.slice(0,12).map(c=>`<div class="cambio"><span>${esc(c.nombre)}</span><span class="num">${euros(c.antes)} → <b>${euros(c.despues)}</b></span></div>`).join("")}
+    ${prop.cambios.length>12?`<p>Y ${prop.cambios.length-12} precios más.</p>`:""}
+    ${prop.nuevos.map(c=>`<div class="cambio"><span>Nuevo: ${esc(c.nombre)}</span><b class="num">${euros(c.precio)}</b></div>`).join("")}
+    <button class="btn pri" data-accion="aplicar">Sí, cambiar precios</button><button class="btn" data-accion="descartar">No, déjalo</button></div>`:"";
+  const trabajos=S.trabajos.filter(t=>!b||norm(t.nombre).includes(b)).map(t=>`<details><summary><span>${esc(t.nombre)}</span><span class="num" id="pt-${t.id}">${euros(precioTrabajo(t))}</span></summary>
+    ${t.comp.map(([id,c],k)=>{const i=S.catalogo.find(x=>x.id===id);return i?`<div class="comp"><span>${esc(i.nombre)}</span><input id="tc-${t.id}-${k}" aria-label="Cantidad de ${esc(i.nombre)}" data-tcomp="${t.id}" data-k="${k}" inputmode="decimal" value="${esc(String(c).replace(".",","))}"></div>`:""}).join("")}
+    </details>`).join("");
+  return `<div class="hero"><div class="wrap hero-in">${marca()}<h1>Mis precios</h1>
+    ${botonMic("precios-voz")}
+    <textarea id="precios-voz" style="min-height:96px" aria-label="Lo que has dicho" placeholder="Por ejemplo: la hora a 38 euros">${esc(V.preciosTexto)}</textarea>
+    <button class="btn pri " data-accion="interpretarP" >Cambiar precios</button>
+    ${propH}${nota()}
+  </div></div><main class="wrap pila">
+   <p class="aviso warn">Estos precios son inventados. Hay que cambiarlos por los reales.</p>
+   <label>Buscar un precio<input id="p-buscar" value="${esc(V.buscar)}"></label>
+   <section class="seccion"><h2>Lista de precios</h2><div>${grupos||'<p>No hay nada con ese nombre.</p>'}</div></section>
+   <section class="seccion"><h2>Lo que lleva cada trabajo</h2>${trabajos||'<p>No hay nada con ese nombre.</p>'}</section>
+  </main>${nav()}`;
+}
+function vNegocio(){
+  const n=S.negocio;
+  const c=(k,t,x="")=>`<label>${t}<input id="n-${k}" data-neg="${k}" value="${esc(n[k])}" ${x}></label>`;
+  return `<div class="hero"><div class="wrap hero-in">${marca()}<h1>Mis datos</h1><p>Esto sale en los presupuestos que envías.</p></div></div><main class="wrap pila">
+   <section class="seccion">
+    ${c("titular","Tu nombre")}${c("nombre","Nombre del negocio")}${c("telefono","Teléfono",'inputmode="tel"')}${c("nif","NIF")}
+   </section>
+   <details ${V.reset?"open":""}><summary>Más opciones</summary><div class="pila" style="gap:12px">
+    ${c("email","Email",'inputmode="email"')}${c("direccion","Dirección")}${c("validez","Días que vale el presupuesto",'inputmode="numeric"')}
+    <label>IVA habitual<select id="n-iva" data-neg="iva">${[21,10,0].map(v=>`<option value="${v}" ${+n.iva===v?"selected":""}>${v} %</option>`).join("")}</select></label>
+    <label>Condiciones<textarea id="n-condiciones" data-neg="condiciones">${esc(n.condiciones)}</textarea></label>
+    <p style="color:var(--muted)">Todo se guarda solo en este móvil.</p>
+    ${V.reset?'<div class="dos"><button class="btn borrar" data-accion="resetOk">Sí, empezar de cero</button><button class="btn" data-accion="resetNo">No</button></div>':'<button class="btn borrar" data-accion="reset">Volver a los datos de ejemplo</button>'}
+   </div></details>
+  </main>${nav()}`;
+}
+function refrescarTotales(){
+  const q=Q();if(!q)return;const t=totales(q);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set("t-total",euros(t.total));
+  q.lineas.forEach((l,i)=>{set("cant-"+i,cantidadTexto(l));set("imp-"+i,l.precio===null?"":euros((Number(l.cantidad)||0)*(Number(l.precio)||0)));const f=document.getElementById("falta-"+i);if(f)f.hidden=l.precio!==null});
+}
+function preparar(){
+  pararVoz(true);
+  const ta=$("#dictado");const texto=(ta?ta.value:V.dictado).trim();V.dictado=texto;
+  if(!texto){V.nota={t:"Pulsa el micrófono y cuenta el trabajo.",tipo:"warn"};render();return}
+  V.nota=null;
+  const r=interpretarLocal(texto,S.catalogo,S.trabajos);
+  if(!r.lineas.length){V.nota={t:"No he reconocido el trabajo. Prueba otra vez o hazlo a mano.",tipo:"warn"};render();return}
+  V.dictado="";
+  nuevoQ({titulo:r.titulo,cliente:r.cliente,lineas:r.lineas,dudas:[]});
+}
+function interpretarP(){
+  pararVoz(true);
+  const ta=$("#precios-voz");const texto=(ta?ta.value:V.preciosTexto).trim();V.preciosTexto=texto;
+  if(!texto){V.nota={t:"Pulsa el micrófono y di qué precio cambia.",tipo:"warn"};render();return}
+  V.nota=null;V.propuesta=null;
+  const r=interpretarPrecios(texto,S.catalogo);
+  if(!r.cambios.length&&!r.nuevos.length)V.nota={t:"No he encontrado ese precio. Prueba con «la hora a 38 euros».",tipo:"warn"};
+  else V.propuesta=r;
+  render();
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let voz=null;
+function escuchar(id){
+  if(voz){pararVoz(false);return}
+  const ta=document.getElementById(id);if(!ta||!SR)return;
+  const base=ta.value.trim();
+  const rec=new SR();rec.lang="es-ES";rec.continuous=true;rec.interimResults=true;
+  let oido="";
+  rec.onresult=e=>{let t="";for(const r of e.results)t+=r[0].transcript+" ";oido=t.trim();const v=(base+" "+oido).trim();const el=document.getElementById(id);if(el)el.value=v;if(id==="dictado")V.dictado=v;else V.preciosTexto=v};
+  rec.onerror=e=>{
+    const m={"not-allowed":"El móvil no deja usar el micrófono. Dale permiso en los ajustes del navegador.","service-not-allowed":"El móvil no deja usar el micrófono. Dale permiso en los ajustes del navegador.","no-speech":"No te he oído. Pulsa el micrófono y habla otra vez.","audio-capture":"No encuentro el micrófono del móvil.","network":"Hace falta internet para dictar."}[e.error];
+    if(m&&e.error!=="aborted")V.nota={t:m,tipo:"warn"};
+  };
+  rec.onend=()=>{voz=null;render()};
+  try{rec.start();voz=rec;V.nota=null;render()}catch(e){voz=null;V.nota={t:"No se ha podido usar el micrófono. Prueba otra vez.",tipo:"warn"};render()}
+}
+function pararVoz(cortar){if(voz){const r=voz;voz=null;if(cortar)r.onresult=null;try{r.stop()}catch(e){}}}
+function botonMic(id){
+  if(!SR)return `<ol class="pasos"><li><i>1</i><span>Toca el recuadro blanco.</span></li><li><i>2</i><span>Pulsa el micrófono ${MIC} del teclado y habla.</span></li></ol>`;
+  return `<div class="mic-zona"><button class="mic ${voz?"oyendo":""}" data-mic="${id}" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Pulsa para hablar"}">${MIC_G}</button><p aria-live="polite">${voz?"Te escucho. Pulsa para terminar":"Pulsa y cuéntalo"}</p></div>`;
+}
+function pdfDe(q){
+  const{jsPDF}=window.jspdf;const n=S.negocio,t=totales(q);
+  const d=new jsPDF({unit:"mm",format:"a4"});
+  const W=210,M=16;const azul=[27,99,198],amar=[255,217,90],tinta=[20,40,59],gris=[68,88,107];
+  const banda=()=>{
+    d.setFillColor(...azul);d.rect(0,0,W,30,"F");d.setFillColor(...amar);d.rect(0,30,W,1.5,"F");
+    d.setFillColor(...amar);d.circle(M+7,15,7,"F");d.setDrawColor(...tinta);d.setLineWidth(1.3);d.lines([[4,-9],[4,9]],M+3,20);d.setLineWidth(1);d.line(M+4.7,16.5,M+9.3,16.5);
+    d.setTextColor(255,255,255);d.setFont("helvetica","bold");d.setFontSize(20);d.text("Alcolea",M+18,15.5);
+    d.setFont("helvetica","normal");d.setFontSize(9);d.text(n.nombre||"",M+18,21);
+    d.setFont("helvetica","bold");d.setFontSize(11);d.text("Presupuesto "+q.num,W-M,14,{align:"right"});
+    d.setFont("helvetica","normal");d.setFontSize(9);const v=new Date(q.fecha);v.setDate(v.getDate()+(+n.validez||30));
+    d.text("Fecha "+fecha(q.fecha),W-M,19.5,{align:"right"});d.text("Válido hasta "+fecha(v.toISOString().slice(0,10)),W-M,24,{align:"right"});
+    d.setTextColor(...tinta);
+  };
+  banda();
+  let y=44;
+  d.setFontSize(8);d.setTextColor(...gris);d.text("CLIENTE",M,y);d.text("EMITIDO POR",W/2+6,y);d.setTextColor(...tinta);d.setFontSize(10);y+=5;
+  const izq=[q.cliente.nombre||"Cliente",q.cliente.direccion,q.cliente.telefono].filter(Boolean);
+  const der=[n.titular||n.nombre,n.nif&&"NIF "+n.nif,n.direccion,[n.telefono,n.email].filter(Boolean).join(" · ")].filter(Boolean);
+  const fil=(arr,x)=>{let yy=y;arr.forEach((s,i)=>{d.setFont("helvetica",i?"normal":"bold");for(const r of d.splitTextToSize(String(s),W/2-M-8)){d.text(r,x,yy);yy+=4.8}});return yy};
+  y=Math.max(fil(izq,M),fil(der,W/2+6))+3;
+  if(q.titulo){d.setFont("helvetica","bold");d.setFontSize(12);d.text(q.titulo,M,y);y+=7}
+  const colC=W-M-68,colP=W-M-30,colI=W-M;
+  const thead=()=>{d.setFont("helvetica","bold");d.setFontSize(8);d.setTextColor(...gris);d.text("CONCEPTO",M,y);d.text("CANTIDAD",colC,y,{align:"right"});d.text("PRECIO",colP,y,{align:"right"});d.text("IMPORTE",colI,y,{align:"right"});d.setTextColor(...tinta);d.setDrawColor(...azul);d.setLineWidth(.5);d.line(M,y+1.8,W-M,y+1.8);y+=7};
+  thead();
+  d.setFontSize(9.5);
+  for(const l of q.lineas){
+    const rs=d.splitTextToSize(String(l.nombre),colC-M-22);
+    if(y+rs.length*4.5>272){d.addPage();banda();y=44;thead();d.setFontSize(9.5)}
+    d.setFont("helvetica","normal");d.text(rs,M,y);
+    d.text(String(l.cantidad).replace(".",",")+" "+l.unidad,colC,y,{align:"right"});d.text(euros(l.precio),colP,y,{align:"right"});d.text(euros(l.cantidad*l.precio),colI,y,{align:"right"});
+    y+=rs.length*4.5+1;d.setDrawColor(220,227,233);d.setLineWidth(.2);d.line(M,y-2.4,W-M,y-2.4);y+=2.2;
+  }
+  if(y>236){d.addPage();banda();y=44}
+  y+=3;const X=W-M-70;
+  const suma=(a,b,g)=>{d.setFont("helvetica",g?"bold":"normal");d.setFontSize(g?13:10);d.text(a,X,y);d.text(b,W-M,y,{align:"right"});y+=g?8:5.5};
+  suma("Sin IVA",euros(t.base));suma("IVA "+q.iva+" %",euros(t.iva));
+  d.setDrawColor(...azul);d.setLineWidth(.5);d.line(X,y-2,W-M,y-2);y+=3.5;suma("Total",euros(t.total),true);
+  y+=4;d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(...gris);d.text(d.splitTextToSize(n.condiciones||"",W-2*M),M,y);
+  return d;
+}
+function archivoPDF(q){
+  const nombre="Presupuesto-Alcolea-"+q.num+".pdf";
+  return{nombre,blob:pdfDe(q).output("blob")};
+}
+function descargar(){
+  const q=Q();if(!q)return;
+  const{nombre,blob}=archivoPDF(q);
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=nombre;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+  toast("PDF guardado");
+}
+async function enviar(){
+  const q=Q();if(!q)return;
+  const{nombre,blob}=archivoPDF(q);
+  const file=new File([blob],nombre,{type:"application/pdf"});
+  const datos={files:[file],text:mensajeWA(q),title:nombre};
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share(datos);if(q.estado==="borrador"){q.estado="enviado";guardar()};render()}
+    catch(e){if(e.name!=="AbortError"){V.nota={t:"No se ha podido abrir el menú de enviar. Prueba con Guardar PDF.",tipo:"bad"};render()}}
+    return;
+  }
+  descargar();window.open(urlWA(q),"_blank","noopener");
+  V.nota={t:"PDF guardado. Adjúntalo en WhatsApp.",tipo:""};render();
+}
+document.addEventListener("click",async e=>{
+  const go=e.target.closest("[data-go]");
+  if(go){pararVoz(true);V.vista=go.dataset.go;V.nota=null;V.buscar="";V.propuesta=null;V.reset=false;V.confirma=null;render();window.scrollTo(0,0);return}
+  const mas=e.target.closest("[data-mas],[data-menos]");
+  if(mas){const up=mas.dataset.mas!==undefined;const l=Q().lineas[+(up?mas.dataset.mas:mas.dataset.menos)];const n=redondea((Number(l.cantidad)||0)+(up?1:-1));if(n>0){l.cantidad=n;guardar();refrescarTotales();const c=document.getElementById("l-c-"+Q().lineas.indexOf(l));if(c)c.value=String(n).replace(".",",")}else toast("Para quitarlo, pulsa Cambiar y luego Quitar");return}
+  const edl=e.target.closest("[data-editarl]");
+  if(edl){V.abierta=+edl.dataset.editarl;render();return}
+  if(e.target.closest("[data-cerrarl]")){V.abierta=null;render();return}
+  const ab=e.target.closest("[data-abrir]");
+  if(ab){V.actual=ab.dataset.abrir;V.vista="editor";V.nota=null;V.abierta=null;render();window.scrollTo(0,0);return}
+  const qt=e.target.closest("[data-quitar]");
+  if(qt){Q().lineas.splice(+qt.dataset.quitar,1);V.abierta=null;guardar();render();return}
+  const es=e.target.closest("[data-estado]");
+  if(es){Q().estado=es.dataset.estado;guardar();render();return}
+  const addt=e.target.closest("[data-addt]");
+  if(addt){const tr=S.trabajos.find(t=>t.id===addt.dataset.addt);const q=Q();if(!q.titulo)q.titulo=tr.nombre;
+    for(const[id,c]of tr.comp){const i=S.catalogo.find(x=>x.id===id);if(!i)continue;const l=q.lineas.find(x=>x.id===id);if(l)l.cantidad=redondea(l.cantidad+c);else q.lineas.push(lineaDe(i,c))}
+    V.hoja=null;guardar();render();toast(tr.nombre+" añadido");return}
+  const addi=e.target.closest("[data-addi]");
+  if(addi){const i=S.catalogo.find(x=>x.id===addi.dataset.addi);const q=Q();const l=q.lineas.find(x=>x.id===i.id);if(l)l.cantidad=redondea(l.cantidad+1);else q.lineas.push(lineaDe(i,1));V.hoja=null;guardar();render();toast(i.nombre+" añadido");return}
+  if(e.target.classList&&e.target.classList.contains("sheet-fondo")){V.hoja=null;render();return}
+  const mc=e.target.closest("[data-mic]");
+  if(mc){escuchar(mc.dataset.mic);return}
+  const ac=e.target.closest("[data-accion]");if(!ac)return;
+  const a=ac.dataset.accion;
+  if(a==="preparar")preparar();
+  else if(a==="ejemplo"){V.dictado=EJEMPLOS[V.ejemplo%EJEMPLOS.length];V.ejemplo++;render()}
+  else if(a==="mano"){V.nota=null;nuevoQ()}
+  else if(a==="anadir"){V.hoja="anadir";V.buscar="";render()}
+  else if(a==="cerrar"){V.hoja=null;render()}
+  else if(a==="libre"){Q().lineas.push({id:null,nombre:"",unidad:"ud",cantidad:1,precio:null});V.abierta=Q().lineas.length-1;guardar();render();const n=Q().lineas.length-1;document.getElementById("l-n-"+n)?.focus()}
+  else if(a==="ver"){V.vista="vista";V.nota=null;render();window.scrollTo(0,0)}
+  else if(a==="editar"){V.vista="editor";V.nota=null;render();window.scrollTo(0,0)}
+  else if(a==="duplicar"){const q=Q();nuevoQ({titulo:q.titulo,cliente:{...q.cliente},lineas:JSON.parse(JSON.stringify(q.lineas))});toast("Copia creada")}
+  else if(a==="borrarQ"){V.confirma="borrarQ";render()}
+  else if(a==="noBorrar"){V.confirma=null;render()}
+  else if(a==="borrarOk"){S.quotes=S.quotes.filter(q=>q.id!==V.actual);V.confirma=null;V.vista="inicio";guardar();render();toast("Presupuesto borrado")}
+  else if(a==="pdf")descargar();
+  else if(a==="enviar")enviar();
+  else if(a==="wa"){const q=Q();if(q.estado==="borrador"){q.estado="enviado";guardar()}}
+  else if(a==="copiar"){const q=Q();const m=mensajeWA(q);
+    try{await navigator.clipboard.writeText(m);toast("Mensaje copiado")}catch(err){V.nota={t:m};render()}}
+  else if(a==="interpretarP")interpretarP();
+  else if(a==="descartar"){V.propuesta=null;render()}
+  else if(a==="aplicar"){
+    const p=V.propuesta;for(const c of p.cambios){const i=S.catalogo.find(x=>x.id===c.id);if(i)i.precio=c.despues}
+    for(const n of p.nuevos)S.catalogo.push({id:"x"+uid(),cat:"Otros",nombre:n.nombre,unidad:n.unidad,precio:n.precio,claves:""});
+    V.propuesta=null;V.preciosTexto="";guardar();render();toast("Precios actualizados");
+  }
+  else if(a==="reset"){V.reset=true;render()}
+  else if(a==="resetNo"){V.reset=false;render()}
+  else if(a==="resetOk"){S=estadoInicial();V.reset=false;guardar();render();toast("Datos de ejemplo restaurados")}
+});
+function aPrecio(v){const t=String(v).trim();if(t==="")return null;const n=Number(t.includes(",")?t.replace(/\./g,"").replace(",","."):t);return isFinite(n)&&n>=0?n:null}
+document.addEventListener("input",e=>{
+  const el=e.target;
+  if(el.id==="dictado"){V.dictado=el.value;return}
+  if(el.id==="precios-voz"){V.preciosTexto=el.value;return}
+  if(el.id==="h-buscar"){V.buscar=el.value;const b=norm(V.buscar);$("#h-res").innerHTML=resHoja(S.trabajos.filter(t=>!b||norm(t.nombre).includes(b)),S.catalogo.filter(i=>!b||norm(i.nombre).includes(b)));return}
+  if(el.id==="p-buscar"){V.buscar=el.value;const p=el.selectionStart;render();const n=$("#p-buscar");n.focus();n.setSelectionRange(p,p);return}
+  if(el.dataset.cl){const q=Q();q.cliente[el.dataset.cl]=el.value;
+    if(el.dataset.cl==="nombre"){const o=S.quotes.find(x=>x.id!==q.id&&x.cliente.nombre===el.value);if(o){q.cliente.telefono=o.cliente.telefono;q.cliente.direccion=o.cliente.direccion;const a=$("#c-telefono"),b=$("#c-direccion");if(a)a.value=q.cliente.telefono;if(b)b.value=q.cliente.direccion}}
+    guardar();return}
+  if(el.dataset.q){const q=Q();q[el.dataset.q]=el.dataset.q==="iva"?+el.value:el.value;guardar();refrescarTotales();return}
+  if(el.dataset.c){const i=+el.closest(".linea").dataset.i;const l=Q().lineas[i];const c=el.dataset.c;
+    if(c==="cantidad")l.cantidad=Number(String(el.value).replace(",","."))||0;
+    else if(c==="precio")l.precio=aPrecio(el.value);
+    else l[c]=el.value;
+    guardar();refrescarTotales();return}
+  if(el.dataset.precio){const i=S.catalogo.find(x=>x.id===el.dataset.precio);const v=aPrecio(el.value);if(i&&v!==null){i.precio=v;guardar()}return}
+  if(el.dataset.tcomp){const t=S.trabajos.find(x=>x.id===el.dataset.tcomp);const v=Number(String(el.value).replace(",","."));if(t&&v>=0){t.comp[+el.dataset.k][1]=v;guardar();const e2=document.getElementById("pt-"+t.id);if(e2)e2.textContent=euros(precioTrabajo(t))}return}
+  if(el.dataset.neg){const k=el.dataset.neg;S.negocio[k]=(k==="iva"||k==="validez")?(Number(el.value)||0):el.value;guardar();return}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&V.hoja){V.hoja=null;render()}});
+
+render();
+
+</script>
+</body>
+</html>
