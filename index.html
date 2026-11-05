@@ -302,14 +302,47 @@ function estadoInicial(){
     negocio:{nombre:"Instalaciones Alcolea",titular:"",nif:"",telefono:"",email:"",direccion:"Madrid",iva:21,validez:30,condiciones:"Forma de pago: 50 % al aceptar y 50 % al terminar. Cualquier trabajo no incluido se presupuestará aparte."}}
 }
 let S=estadoInicial();
-let V={vista:"inicio",actual:null,buscar:"",hoja:null,dictado:"",preciosTexto:"",propuesta:null,nota:null,confirma:null,reset:false,abierta:null,ejemplo:0,subiendo:false};
+let V={vista:"inicio",actual:null,buscar:"",hoja:null,dictado:"",preciosTexto:"",propuesta:null,nota:null,confirma:null,reset:false,abierta:null,ejemplo:0,creando:false,todos:false};
 
 try{const raw=localStorage.getItem(LS);if(raw){const p=JSON.parse(raw);if(p&&p.v===1&&Array.isArray(p.catalogo))S=p}}catch(e){}
 
+const LS_CONEX="alcolea-conexion";
+let conex=null;
+try{conex=JSON.parse(localStorage.getItem(LS_CONEX))}catch(e){}
+(()=>{const m=location.hash.match(/^#conectar=([\w-]+)\.([\w-]+)$/);if(!m)return;
+  conex={id:m[1],clave:m[2]};
+  try{localStorage.setItem(LS_CONEX,JSON.stringify(conex))}catch(e){}
+  history.replaceState(null,"",location.pathname+location.search)})();
+const urlConex=()=>"https://script.google.com/macros/s/"+conex.id+"/exec";
+async function pedir(cuerpo){
+  const r=await fetch(urlConex(),{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({clave:conex.clave,...cuerpo})});
+  const d=await r.json();if(!d.ok)throw new Error(d.error||"drive");return d;
+}
+let saveT=null,subiendo=false,pendiente=false,driveFalla=false;
 function guardar(){
   S.updatedAt=Date.now();
   try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast("No se ha podido guardar en este móvil")}
+  if(!conex)return;
+  pendiente=true;clearTimeout(saveT);saveT=setTimeout(subir,2500);
 }
+async function subir(){
+  if(!conex||!pendiente||subiendo)return;
+  subiendo=true;pendiente=false;
+  try{await pedir({accion:"guardar",estado:S});if(driveFalla){driveFalla=false;if(V.vista==="inicio"||V.vista==="negocio")render()}}
+  catch(e){pendiente=true;if(!driveFalla){driveFalla=true;if(V.vista==="inicio"||V.vista==="negocio")render()}}
+  subiendo=false;
+  if(pendiente&&!driveFalla)subir();
+}
+async function bajar(){
+  if(!conex)return;
+  try{
+    const r=await fetch(urlConex()+"?clave="+encodeURIComponent(conex.clave));const d=await r.json();
+    if(d.ok&&d.estado&&d.estado.v===1&&(d.estado.updatedAt||0)>(S.updatedAt||0)){S=d.estado;try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(V.vista==="inicio")render()}
+    else if(d.ok&&!d.estado&&S.updatedAt){pendiente=true;subir()}
+  }catch(e){}
+}
+window.addEventListener("online",subir);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)subir();else bajar()});
 function toast(t){
   document.querySelectorAll(".toast").forEach(n=>n.remove());
   const n=document.createElement("div");n.className="toast";n.setAttribute("role","status");n.textContent=t;document.body.append(n);setTimeout(()=>n.remove(),2600);
@@ -345,7 +378,7 @@ function nav(){
 }
 function nota(){return V.nota?`<p class="aviso ${V.nota.tipo||""}" role="status">${esc(V.nota.t)}</p>`:""}
 function vInicio(){
-  const filas=S.quotes.map(q=>{const t=totales(q);const st=ESTADOS.find(e=>e[0]===q.estado);
+  const filas=(V.todos?S.quotes:S.quotes.slice(0,3)).map(q=>{const t=totales(q);const st=ESTADOS.find(e=>e[0]===q.estado);
     return `<button class="pres" data-abrir="${q.id}"><span class="a"><b>${esc(q.cliente.nombre||"Sin cliente")}</b><span class="imp num">${euros(t.total)}</span></span><small>${esc(q.titulo||"Presupuesto")}</small><span class="a"><small>${fecha(q.fecha)}</small><span class="pill st-${q.estado}">${st[1]}</span></span></button>`}).join("");
   return `<div class="hero"><div class="wrap hero-in">${marca()}
     <h1>Hola, ¿qué trabajo tienes?</h1>
@@ -353,9 +386,9 @@ function vInicio(){
     <textarea id="dictado" aria-label="Lo que has contado" placeholder="Aquí saldrá lo que digas">${esc(V.dictado)}</textarea>
     <button class="btn pri " data-accion="preparar" >Hacer presupuesto</button>
     <button class="enlace" data-accion="ejemplo">Probar con un ejemplo</button>
-  </div></div><main class="wrap pila">${nota()}
+  </div></div><main class="wrap pila">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
     <button class="btn" data-accion="mano">Hacerlo a mano</button>
-    <section class="seccion"><h2>Mis presupuestos</h2><div class="tarjetas">${filas||'<p>Aún no hay presupuestos.</p>'}</div></section>
+    <section class="seccion"><h2>Mis presupuestos</h2><div class="tarjetas">${filas||'<p>Aún no hay presupuestos.</p>'}</div>${S.quotes.length>3?`<button class="btn" data-accion="todos">${V.todos?"Ver menos":"Ver todos ("+S.quotes.length+")"}</button>`:""}</section>
   </main>${nav()}`;
 }
 const CANT={h:["hora","horas"],m:["metro","metros"],saco:["saco","sacos"],ud:["unidad","unidades"]};
@@ -411,15 +444,17 @@ function hojaHTML(q){
   <div class="suma num"><div><span>Sin IVA</span><span>${euros(t.base)}</span></div><div><span>IVA ${q.iva} %</span><span>${euros(t.iva)}</span></div><div class="g"><span>Total</span><span>${euros(t.total)}</span></div></div>
   <p style="font-size:.9rem;color:#44586B">${esc(n.condiciones)}</p></article>`;
 }
-function mensajeWA(q){
+function mensajeWA(q,enlace){
   const t=totales(q);
   const nombre=q.cliente.nombre?" "+q.cliente.nombre.replace(/\s*\(ejemplo\)/,"").split(" ")[0]:"";
-  return `Hola${nombre}, soy ${S.negocio.titular||"Alcolea"}. Te paso el presupuesto ${q.num}${q.titulo?" de "+q.titulo.toLowerCase():""}: ${euros(t.total)} con IVA. Te adjunto el PDF con el detalle. Cualquier duda, me dices.`;
+  return `Hola${nombre}, soy ${S.negocio.titular||"Alcolea"}. Te paso el presupuesto ${q.num}${q.titulo?" de "+q.titulo.toLowerCase():""}: ${euros(t.total)} con IVA. ${enlace?"Puedes verlo aquí: "+enlace:"Te adjunto el PDF con el detalle."} Cualquier duda, me dices.`;
 }
-function urlWA(q){
+const firmaPDF=q=>JSON.stringify([q.lineas,q.cliente,q.iva,q.titulo,S.negocio]);
+const enlaceVigente=q=>q.pdfUrl&&q.pdfFirma===firmaPDF(q)?q.pdfUrl:null;
+function urlWA(q,enlace){
   let d=String(q.cliente.telefono||"").replace(/\D/g,"");
   if(d.length===9)d="34"+d;
-  return "https://wa.me/"+d+"?text="+encodeURIComponent(mensajeWA(q));
+  return "https://wa.me/"+d+"?text="+encodeURIComponent(mensajeWA(q,enlace));
 }
 function vVista(){
   const q=Q();if(!q){V.vista="inicio";return vInicio()}
@@ -431,11 +466,18 @@ function vVista(){
   ${hojaHTML(q)}
   <div class="pila" style="gap:10px">
     <h2>Para enviarlo</h2>
-    <p>Pulsa el botón y elige WhatsApp. El PDF ya va adjunto.</p>
-    <button class="btn pri" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar por WhatsApp</button>
+    ${conex?envioConEnlace(q,bloqueado):`<p>Pulsa el botón y elige WhatsApp. El PDF ya va adjunto.</p>
+    <button class="btn pri" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar por WhatsApp</button>`}
     <button class="enlace" data-accion="pdf" ${bloqueado?"disabled":""}>Guardar PDF en el móvil</button>
     <button class="enlace" data-accion="copiar">Copiar el mensaje</button>
   </div></main>`;
+}
+function envioConEnlace(q,bloqueado){
+  const enlace=enlaceVigente(q);
+  return `<ol class="pasos"><li><i>1</i><span>Crea el enlace del presupuesto.</span></li><li><i>2</i><span>Abre WhatsApp y pulsa enviar.</span></li></ol>
+    ${enlace?`<p class="aviso" role="status">El enlace está listo.</p><a class="btn pri" href="${esc(urlWA(q,enlace))}" target="_blank" rel="noopener" data-accion="wa">Abrir WhatsApp</a>`
+    :`<button class="btn pri" data-accion="enlace" ${bloqueado||V.creando?"disabled":""}>${V.creando?"Creando enlace…":"Crear enlace"}</button>`}
+    <button class="enlace" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar con el PDF adjunto</button>`;
 }
 function vHoja(){
   const b=norm(V.buscar);
@@ -489,7 +531,7 @@ function vNegocio(){
     ${c("email","Email",'inputmode="email"')}${c("direccion","Dirección")}${c("validez","Días que vale el presupuesto",'inputmode="numeric"')}
     <label>IVA habitual<select id="n-iva" data-neg="iva">${[21,10,0].map(v=>`<option value="${v}" ${+n.iva===v?"selected":""}>${v} %</option>`).join("")}</select></label>
     <label>Condiciones<textarea id="n-condiciones" data-neg="condiciones">${esc(n.condiciones)}</textarea></label>
-    <p style="color:var(--muted)">Todo se guarda solo en este móvil.</p>
+    <p style="color:var(--muted)">${conex?(driveFalla?"Ahora no se puede guardar en Google Drive. Se volverá a intentar.":"Se guarda en Google Drive."):"Todo se guarda solo en este móvil."}</p>
     ${V.reset?'<div class="dos"><button class="btn borrar" data-accion="resetOk">Sí, empezar de cero</button><button class="btn" data-accion="resetNo">No</button></div>':'<button class="btn borrar" data-accion="reset">Volver a los datos de ejemplo</button>'}
    </div></details>
   </main>${nav()}`;
@@ -582,6 +624,17 @@ function pdfDe(q){
   y+=4;d.setFont("helvetica","normal");d.setFontSize(8.5);d.setTextColor(...gris);d.text(d.splitTextToSize(n.condiciones||"",W-2*M),M,y);
   return d;
 }
+async function crearEnlace(){
+  const q=Q();if(!q||!conex||V.creando)return;
+  const firma=firmaPDF(q);
+  V.creando=true;V.nota=null;render();
+  try{
+    const base64=pdfDe(q).output("datauristring").split(",")[1];
+    const d=await pedir({accion:"pdf",nombre:"Presupuesto-Alcolea-"+q.num+".pdf",base64});
+    q.pdfUrl=d.url;q.pdfFirma=firma;if(q.estado==="borrador")q.estado="enviado";guardar();
+  }catch(e){V.nota={t:"No se ha podido crear el enlace. Mira si tienes internet y vuelve a probar.",tipo:"bad"}}
+  V.creando=false;render();
+}
 function archivoPDF(q){
   const nombre="Presupuesto-Alcolea-"+q.num+".pdf";
   return{nombre,blob:pdfDe(q).output("blob")};
@@ -644,6 +697,8 @@ document.addEventListener("click",async e=>{
   else if(a==="borrarOk"){S.quotes=S.quotes.filter(q=>q.id!==V.actual);V.confirma=null;V.vista="inicio";guardar();render();toast("Presupuesto borrado")}
   else if(a==="pdf")descargar();
   else if(a==="enviar")enviar();
+  else if(a==="todos"){V.todos=!V.todos;render()}
+  else if(a==="enlace")crearEnlace();
   else if(a==="wa"){const q=Q();if(q.estado==="borrador"){q.estado="enviado";guardar()}}
   else if(a==="copiar"){const q=Q();const m=mensajeWA(q);
     try{await navigator.clipboard.writeText(m);toast("Mensaje copiado")}catch(err){V.nota={t:m};render()}}
@@ -682,6 +737,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&V.hoja){V.hoja=null
 
 render();
 
+bajar();
 </script>
 </body>
 </html>
