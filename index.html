@@ -164,6 +164,45 @@ details[open]{padding-bottom:16px}
 .chip .a{color:var(--card-pri)}
 .chip .punto{width:10px;height:10px;border-radius:50%;background:var(--pri)}
 .hero-in h1{font-size:2rem}
+
+/* Microinteracciones */
+.btn,.pres,.opcion,.nav button,.pasador button,.mic,.estado button,.chip,.volver,.enlace,summary{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media (prefers-reduced-motion:no-preference){
+  .btn,.pres,.opcion,.nav button,.pasador button,.estado button,.mic{transition:transform .22s cubic-bezier(.3,1.4,.5,1),background-color .2s,box-shadow .2s,color .2s}
+  .btn:active:not(:disabled),.pres:active,.opcion:active,.estado button:active{transform:scale(.965);transition-duration:.08s}
+  .nav button:active,.pasador button:active{transform:scale(.88);transition-duration:.08s}
+  .mic:active{transform:scale(.92);transition-duration:.08s}
+  .nav button svg{transition:transform .35s cubic-bezier(.3,1.6,.5,1)}
+  .nav button[aria-current="page"] svg{transform:translateY(-2px) scale(1.08)}
+  .salta{animation:salta .32s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes salta{40%{transform:scale(1.18)}}
+  .anima .widget,.anima .pres,.anima .chip{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
+  .anima .chip:nth-child(2){animation-delay:.05s}
+  .anima .widget:nth-child(1){animation-delay:.08s}.anima .widget:nth-child(2){animation-delay:.14s}
+  .anima .pres:nth-child(1){animation-delay:.18s}.anima .pres:nth-child(2){animation-delay:.24s}.anima .pres:nth-child(3){animation-delay:.3s}
+  @keyframes sube{from{opacity:0;transform:translateY(14px) scale(.98)}}
+  .anima .barra i{animation:crece .7s cubic-bezier(.2,.9,.3,1) both;transform-origin:left}
+  .anima .barra i:nth-child(2){animation-delay:.1s}.anima .barra i:nth-child(3){animation-delay:.2s}
+  @keyframes crece{from{transform:scaleX(0)}}
+  .anima .anillo circle+circle{animation:dibuja 1s .2s cubic-bezier(.2,.9,.3,1) both}
+  @keyframes dibuja{from{stroke-dasharray:0 999}}
+  .sheet-fondo{animation:funde .25s ease both}
+  .sheet{animation:hoja .45s cubic-bezier(.2,1.1,.3,1) both}
+  @keyframes funde{from{opacity:0}}
+  @keyframes hoja{from{transform:translateY(100%)}}
+  .toast{animation:tost .45s cubic-bezier(.2,1.3,.4,1) both}
+  @keyframes tost{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
+  .onda{display:inline-flex;gap:3px;align-items:center;height:18px;margin-right:8px;vertical-align:-3px}
+  .onda i{width:4px;border-radius:2px;background:var(--bad);animation:onda .9s ease-in-out infinite}
+  .onda i:nth-child(2){animation-delay:.15s}.onda i:nth-child(3){animation-delay:.3s}.onda i:nth-child(4){animation-delay:.45s}
+  @keyframes onda{0%,100%{height:5px}50%{height:18px}}
+  ::view-transition-old(root){animation:.22s ease both vt-sale}
+  ::view-transition-new(root){animation:.32s cubic-bezier(.2,.9,.3,1) both vt-entra}
+  @keyframes vt-sale{to{opacity:0;transform:scale(.985)}}
+  @keyframes vt-entra{from{opacity:0;transform:translateX(18px)}}
+}
+.toast{display:flex;align-items:center;gap:8px}
+.toast::before{content:"✓";color:var(--ok);font-weight:700}
 </style>
 
 
@@ -371,6 +410,22 @@ async function bajar(){
 }
 window.addEventListener("online",subir);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)subir();else bajar()});
+let vibrador=null;
+function tap(fuerte){
+  try{
+    if(navigator.vibrate){navigator.vibrate(fuerte?[12,40,18]:10);return}
+    if(!vibrador){vibrador=document.createElement("label");vibrador.style.cssText="position:fixed;left:-99px;width:1px;height:1px;overflow:hidden";vibrador.innerHTML='<input type="checkbox" switch tabindex="-1" aria-hidden="true">';document.body.append(vibrador)}
+    vibrador.click();
+  }catch(e){}
+}
+function cuenta(el,desde,hasta,fmt){
+  if(QUIETO||desde===hasta){el.textContent=fmt(hasta);return}
+  const t0=performance.now(),d=420;
+  cancelAnimationFrame(el._raf);
+  const paso=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);el.textContent=fmt(desde+(hasta-desde)*e);if(k<1)el._raf=requestAnimationFrame(paso)};
+  el._raf=requestAnimationFrame(paso);
+}
+function salta(el){if(!el||QUIETO)return;el.classList.remove("salta");void el.offsetWidth;el.classList.add("salta")}
 function toast(t){
   document.querySelectorAll(".toast").forEach(n=>n.remove());
   const n=document.createElement("div");n.className="toast";n.setAttribute("role","status");n.textContent=t;document.body.append(n);setTimeout(()=>n.remove(),2600);
@@ -392,9 +447,19 @@ const MIC=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="c
 const ICON={inicio:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>',precios:'<path d="M12 3v18M17 7c-1-2-8-3-9 1s9 3 9 8-9 4-10 1"/>',negocio:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>'};
 const icono=k=>`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
+const QUIETO=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+let ultimaVista=null;
 function render(){
+  const nueva=V.vista!==ultimaVista;
+  if(nueva&&ultimaVista!==null&&document.startViewTransition&&!QUIETO){ultimaVista=V.vista;document.startViewTransition(()=>pinta(true));return}
+  pinta(nueva);
+}
+function pinta(nueva){
+  ultimaVista=V.vista;
   const app=$("#app");
-  const pos=window.scrollY;
+  app.classList.toggle("anima",nueva);
+  if(nueva&&V.vista==="inicio"&&!QUIETO)setTimeout(()=>{const b=document.querySelector(".widget .big");if(b)cuenta(b,0,Number(b.textContent)||0,v=>String(Math.round(v)))},60);
+  const pos=nueva?0:window.scrollY;
   app.innerHTML=V.vista==="editor"?vEditor():V.vista==="vista"?vVista():V.vista==="precios"?vPrecios():V.vista==="negocio"?vNegocio():vInicio();
   if(V.hoja)app.insertAdjacentHTML("beforeend",vHoja());
   window.scrollTo(0,pos);
@@ -482,7 +547,7 @@ function vEditor(){
       ${V.confirma==="borrarQ"?'<div class="dos"><button class="btn borrar" data-accion="borrarOk">Sí, borrar</button><button class="btn" data-accion="noBorrar">No</button></div>':'<button class="btn borrar" data-accion="borrarQ">Borrar presupuesto</button>'}
     </div></details>
   </main>
-  <div class="total"><div class="wrap total-in"><div><small>Total con IVA</small><strong class="num" id="t-total">${euros(t.total)}</strong></div><button class="btn pri" data-accion="ver">Enviar</button></div></div>`;
+  <div class="total"><div class="wrap total-in"><div><small>Total con IVA</small><strong class="num" id="t-total" data-v="${t.total}">${euros(t.total)}</strong></div><button class="btn pri" data-accion="ver">Enviar</button></div></div>`;
 }
 function hojaHTML(q){
   const n=S.negocio,t=totales(q);
@@ -591,7 +656,8 @@ function vNegocio(){
 function refrescarTotales(){
   const q=Q();if(!q)return;const t=totales(q);
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
-  set("t-total",euros(t.total));
+  const tt=document.getElementById("t-total");
+  if(tt){const antes=tt._v??Number(tt.dataset.v);tt._v=t.total;cuenta(tt,antes,t.total,euros)}
   q.lineas.forEach((l,i)=>{set("cant-"+i,cantidadTexto(l));set("imp-"+i,l.precio===null?"":euros((Number(l.cantidad)||0)*(Number(l.precio)||0)));const f=document.getElementById("falta-"+i);if(f)f.hidden=l.precio!==null});
 }
 function preparar(){
@@ -601,7 +667,7 @@ function preparar(){
   V.nota=null;
   const r=interpretarLocal(texto,S.catalogo,S.trabajos);
   if(!r.lineas.length){V.nota={t:"No he reconocido el trabajo. Prueba otra vez o hazlo a mano.",tipo:"warn"};render();return}
-  V.dictado="";
+  V.dictado="";tap(true);
   nuevoQ({titulo:r.titulo,cliente:r.cliente,lineas:r.lineas,dudas:[]});
 }
 function interpretarP(){
@@ -633,7 +699,7 @@ function escuchar(id){
 function pararVoz(cortar){if(voz){const r=voz;voz=null;if(cortar)r.onresult=null;try{r.stop()}catch(e){}}}
 function botonMic(id){
   if(!SR)return `<ol class="pasos"><li><i>1</i><span>Toca el recuadro blanco.</span></li><li><i>2</i><span>Pulsa el micrófono ${MIC} del teclado y habla.</span></li></ol>`;
-  return `<div class="mic-zona"><button class="mic ${voz?"oyendo":""}" data-mic="${id}" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Pulsa para hablar"}">${MIC_G}</button><p aria-live="polite">${voz?"Te escucho. Pulsa para terminar":"Pulsa y cuéntalo"}</p></div>`;
+  return `<div class="mic-zona"><button class="mic ${voz?"oyendo":""}" data-mic="${id}" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Pulsa para hablar"}">${MIC_G}</button><p aria-live="polite">${voz?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Te escucho. Pulsa para terminar':"Pulsa y cuéntalo"}</p></div>`;
 }
 function pdfDe(q){
   const{jsPDF}=window.jspdf;const n=S.negocio,t=totales(q);
@@ -714,7 +780,7 @@ document.addEventListener("click",async e=>{
   const go=e.target.closest("[data-go]");
   if(go){pararVoz(true);V.vista=go.dataset.go;V.nota=null;V.buscar="";V.propuesta=null;V.reset=false;V.confirma=null;render();window.scrollTo(0,0);return}
   const mas=e.target.closest("[data-mas],[data-menos]");
-  if(mas){const up=mas.dataset.mas!==undefined;const l=Q().lineas[+(up?mas.dataset.mas:mas.dataset.menos)];const n=redondea((Number(l.cantidad)||0)+(up?1:-1));if(n>0){l.cantidad=n;guardar();refrescarTotales();const c=document.getElementById("l-c-"+Q().lineas.indexOf(l));if(c)c.value=String(n).replace(".",",")}else toast("Para quitarlo, pulsa Cambiar y luego Quitar");return}
+  if(mas){const up=mas.dataset.mas!==undefined;const l=Q().lineas[+(up?mas.dataset.mas:mas.dataset.menos)];const n=redondea((Number(l.cantidad)||0)+(up?1:-1));if(n>0){l.cantidad=n;tap();guardar();refrescarTotales();salta(document.getElementById("cant-"+Q().lineas.indexOf(l)));const c=document.getElementById("l-c-"+Q().lineas.indexOf(l));if(c)c.value=String(n).replace(".",",")}else{tap(true);toast("Para quitarlo, pulsa Cambiar y luego Quitar")}return}
   const edl=e.target.closest("[data-editarl]");
   if(edl){V.abierta=+edl.dataset.editarl;render();return}
   if(e.target.closest("[data-cerrarl]")){V.abierta=null;render();return}
@@ -723,7 +789,7 @@ document.addEventListener("click",async e=>{
   const qt=e.target.closest("[data-quitar]");
   if(qt){Q().lineas.splice(+qt.dataset.quitar,1);V.abierta=null;guardar();render();return}
   const es=e.target.closest("[data-estado]");
-  if(es){Q().estado=es.dataset.estado;guardar();render();return}
+  if(es){Q().estado=es.dataset.estado;tap(es.dataset.estado==="aceptado");guardar();render();return}
   const addt=e.target.closest("[data-addt]");
   if(addt){const tr=S.trabajos.find(t=>t.id===addt.dataset.addt);const q=Q();if(!q.titulo)q.titulo=tr.nombre;
     for(const[id,c]of tr.comp){const i=S.catalogo.find(x=>x.id===id);if(!i)continue;const l=q.lineas.find(x=>x.id===id);if(l)l.cantidad=redondea(l.cantidad+c);else q.lineas.push(lineaDe(i,c))}
@@ -732,7 +798,7 @@ document.addEventListener("click",async e=>{
   if(addi){const i=S.catalogo.find(x=>x.id===addi.dataset.addi);const q=Q();const l=q.lineas.find(x=>x.id===i.id);if(l)l.cantidad=redondea(l.cantidad+1);else q.lineas.push(lineaDe(i,1));V.hoja=null;guardar();render();toast(i.nombre+" añadido");return}
   if(e.target.classList&&e.target.classList.contains("sheet-fondo")){V.hoja=null;render();return}
   const mc=e.target.closest("[data-mic]");
-  if(mc){escuchar(mc.dataset.mic);return}
+  if(mc){tap();escuchar(mc.dataset.mic);return}
   const ac=e.target.closest("[data-accion]");if(!ac)return;
   const a=ac.dataset.accion;
   if(a==="preparar")preparar();
@@ -759,7 +825,7 @@ document.addEventListener("click",async e=>{
   else if(a==="aplicar"){
     const p=V.propuesta;for(const c of p.cambios){const i=S.catalogo.find(x=>x.id===c.id);if(i)i.precio=c.despues}
     for(const n of p.nuevos)S.catalogo.push({id:"x"+uid(),cat:"Otros",nombre:n.nombre,unidad:n.unidad,precio:n.precio,claves:""});
-    V.propuesta=null;V.preciosTexto="";guardar();render();toast("Precios actualizados");
+    V.propuesta=null;V.preciosTexto="";tap(true);guardar();render();toast("Precios actualizados");
   }
   else if(a==="reset"){V.reset=true;render()}
   else if(a==="resetNo"){V.reset=false;render()}
