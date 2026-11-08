@@ -179,6 +179,8 @@ details[open]{padding-bottom:16px}
   .anima .widget,.anima .pres,.anima .chip{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
   .anima .chip:nth-child(2){animation-delay:.05s}
   .anima .widget:nth-child(1){animation-delay:.08s}.anima .widget:nth-child(2){animation-delay:.14s}
+  .anima .brief,.anima .saludo h1,.anima .compositor{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
+  .anima .compositor{animation-delay:.06s}.anima .brief:nth-child(1){animation-delay:.14s}.anima .brief:nth-child(2){animation-delay:.2s}.anima .brief:nth-child(3){animation-delay:.26s}
   .anima .pres:nth-child(1){animation-delay:.18s}.anima .pres:nth-child(2){animation-delay:.24s}.anima .pres:nth-child(3){animation-delay:.3s}
   @keyframes sube{from{opacity:0;transform:translateY(14px) scale(.98)}}
   .anima .barra i{animation:crece .7s cubic-bezier(.2,.9,.3,1) both;transform-origin:left}
@@ -203,6 +205,47 @@ details[open]{padding-bottom:16px}
 }
 .toast{display:flex;align-items:center;gap:8px}
 .toast::before{content:"✓";color:var(--ok);font-weight:700}
+
+/* Estilo Index: pantallas */
+:root{--bg:#000000;--card:#1C1C1E;--surface:#1C1C1E;--sunken:#2C2C2E;--line:#38383C}
+.top-app{display:flex;align-items:center;gap:10px;padding-block:14px 4px}
+.top-app .nombre{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:5px 14px;font-weight:600;font-size:1.05rem}
+.top-app .yo{all:unset;margin-left:auto;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--fg);cursor:pointer}
+.top-app .yo:focus-visible{outline:3px solid var(--pri)}
+.saludo{text-align:center;padding-block:18px 22px;border-bottom:1px solid var(--line)}
+.saludo h1{font-size:2.15rem;font-weight:500;color:#D8D8DD;letter-spacing:-.03em}
+.saludo .grad{display:block;background:linear-gradient(90deg,#3D7BF5,#8B6CF6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cabeza{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:.98rem;font-weight:500}
+.cabeza .ojo{color:var(--fg)}
+.cabeza button{all:unset;cursor:pointer;color:var(--muted);padding:8px 0}
+.brief{background:var(--card);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.brief p{font-weight:600;font-size:1.12rem;line-height:1.3}
+.brief small{color:var(--muted);font-size:.98rem}
+.brief .btn{width:auto;min-height:56px;margin-top:6px;padding:10px 22px;border-radius:12px;font-size:1.12rem}
+.brief .btn:not(.pri){background:var(--sunken);box-shadow:none}
+.tag{display:inline-block;border-radius:8px;padding:2px 9px;font-weight:600;font-size:.92rem}
+.tag.amarillo{background:#F5D33B;color:#1A1500}
+.tag.azul{background:#2F6FEB;color:#fff}
+.tag.verde{background:#5ED36F;color:#06210C}
+.tag.gris{background:#3A3A3E;color:#D8D8DD}
+.ficha-cab{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ficha-cab h1{font-size:2rem;font-weight:500}
+.volver.chev{min-height:48px;font-size:1.8rem;padding-right:4px;color:var(--fg)}
+.marco{border:1.5px solid var(--line);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.marco .ojo{color:var(--muted)}
+.marco ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-weight:600}
+.marco li::before{content:"✓";color:var(--ok);margin-right:10px;font-weight:700}
+.marco.azul{border-color:var(--pri)}
+.marco.azul .ojo{color:var(--pri-ink)}
+.marco .msg{font-weight:600;font-size:1.1rem;line-height:1.35}
+.marco .fila{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.marco .fila .btn{width:auto;min-height:56px;padding:10px 22px;border-radius:12px}
+.marco .fila .btn:not(.pri){background:var(--sunken);box-shadow:none}
+.compositor{display:flex;gap:10px;align-items:center}
+.compositor textarea{min-height:64px;border-radius:32px;padding:18px 22px;flex:1;background:var(--card);box-shadow:inset 0 0 0 1.5px var(--line)}
+.compositor .mic{width:64px;height:64px;flex:none;box-shadow:none}
+.compositor .mic svg{width:30px;height:30px}
+.dictado-ayuda{text-align:center;color:var(--muted);font-weight:500;font-size:1rem}
 </style>
 
 
@@ -480,32 +523,41 @@ function anillo(p,color){
   const r=40,c=2*Math.PI*r,l=c*Math.max(0,Math.min(1,p));
   return `<div class="anillo"><svg width="96" height="96" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="${r}" fill="none" stroke="#3A3A3E" stroke-width="7"/><circle cx="48" cy="48" r="${r}" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${l} ${c}"/></svg><span class="num">${Math.round(p*100)}%</span></div>`;
 }
+function saludoHora(){const h=new Date().getHours();return h<6?"Buenas noches":h<14?"Buenos días":h<21?"Buenas tardes":"Buenas noches"}
+function diasDesde(f){return Math.max(0,Math.round((new Date(HOY())-new Date(f))/864e5))}
+function primerNombre(q){return (q.cliente.nombre||"el cliente").replace(/\s*\(ejemplo\)/,"").split(" ")[0]}
+function briefDe(q){
+  const t=totales(q),tr=(q.titulo||"el trabajo").toLowerCase(),n=primerNombre(q);
+  if(q.estado==="enviado"){const d=diasDesde(q.fecha);
+    return {tag:["amarillo",d?`Esperando ${d} ${d===1?"día":"días"}`:"Enviado hoy"],p:`${n} aún no ha respondido al presupuesto de ${tr}.`,m:`${euros(t.total)} · enviado el ${fecha(q.fecha)}`,b:q.cliente.telefono?`<a class="btn pri" href="${esc(recordatorioWA(q))}" target="_blank" rel="noopener">Recordar por WhatsApp</a>`:`<button class="btn" data-abrir="${q.id}">Abrir</button>`}}
+  if(q.estado==="borrador")return {tag:["azul","Borrador"],p:`El presupuesto de ${tr} para ${n} está a medias.`,m:`${euros(t.total)} hasta ahora`,b:`<button class="btn pri" data-abrir="${q.id}">Terminarlo</button>`};
+  if(q.estado==="aceptado")return {tag:["verde","Aceptado"],p:`${n} ha aceptado ${tr}.`,m:`${euros(t.total)} con IVA`,b:`<button class="btn" data-abrir="${q.id}">Ver presupuesto</button>`};
+  return {tag:["gris","Rechazado"],p:`${n} no ha aceptado ${tr}.`,m:euros(t.total),b:`<button class="btn" data-abrir="${q.id}">Ver presupuesto</button>`};
+}
+function recordatorioWA(q){
+  let d=String(q.cliente.telefono||"").replace(/\D/g,"");if(d.length===9)d="34"+d;
+  return "https://wa.me/"+d+"?text="+encodeURIComponent(`Hola ${primerNombre(q)}, soy ${S.negocio.titular||"Alcolea"}. ¿Has podido mirar el presupuesto ${q.num}${q.titulo?" de "+q.titulo.toLowerCase():""}? Cualquier duda, me dices.`);
+}
+function topApp(){return `<div class="top-app">${LOGO(40)}<span class="nombre">Alcolea</span><button class="yo" data-go="negocio" aria-label="Mis datos">${icono("negocio")}</button></div>`}
 function vInicio(){
-  const lista=V.todos?S.quotes:S.quotes.slice(0,3);
-  const filas=lista.map(q=>{const t=totales(q);
-    return `<button class="pres" data-abrir="${q.id}"><span class="ojo">${CHISPA} Alcolea · ${ETQ[q.estado]}</span><span class="a"><b>${esc(q.cliente.nombre||"Sin cliente")}</b><span class="imp num ${q.estado}">${euros(t.total)}</span></span><span class="a"><small>${esc(q.titulo||"Presupuesto")}</small><small>${fecha(q.fecha)}</small></span>${barraEstado(q.estado)}</button>`}).join("");
-  const mes=HOY().slice(0,7);
-  const delMes=S.quotes.filter(q=>q.fecha.slice(0,7)===mes);
-  const decididos=S.quotes.filter(q=>q.estado==="aceptado"||q.estado==="rechazado");
-  const pct=decididos.length?S.quotes.filter(q=>q.estado==="aceptado").length/decididos.length:0;
+  const orden={enviado:0,borrador:1,aceptado:2,rechazado:3};
+  const lista=[...S.quotes].sort((a,b)=>orden[a.estado]-orden[b.estado]||b.fecha.localeCompare(a.fecha));
+  const vis=V.todos?lista:lista.slice(0,3);
+  const tarjetas=vis.map(q=>{const r=briefDe(q);return `<article class="brief"><span class="tag ${r.tag[0]}">${r.tag[1]}</span><p>${esc(r.p)}</p><small>${esc(r.m)}</small>${r.b}</article>`}).join("");
   const esperando=S.quotes.filter(q=>q.estado==="enviado").length;
-  const ultAcept=S.quotes.find(q=>q.estado==="aceptado");
-  const chips=[ultAcept?`<span class="chip"><span class="v">✓</span>${esc((ultAcept.cliente.nombre||"Cliente").replace(/\s*\(ejemplo\)/,"").split(" ")[0])} aceptó <em class="v num">${euros(totales(ultAcept).total)}</em></span>`:"",
-    esperando?`<span class="chip"><span class="punto"></span>${esperando} ${esperando===1?"espera":"esperan"} respuesta</span>`:""].join("");
-  return `<div class="hero"><div class="wrap hero-in">${marca()}
-    <h1>Hola, ¿qué trabajo tienes?</h1>
-    ${botonMic("dictado")}
-    <textarea id="dictado" aria-label="Lo que has contado" placeholder="Aquí saldrá lo que digas">${esc(V.dictado)}</textarea>
-    <button class="btn pri" data-accion="preparar">Hacer presupuesto</button>
-    <button class="enlace" data-accion="ejemplo">Probar con un ejemplo</button>
-  </div></div><main class="wrap pila">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
-    ${chips?`<div class="chips">${chips}</div>`:""}
-    <div class="widgets">
-      <div class="widget"><span class="ojo">${CHISPA} Este mes</span><span class="big num">${delMes.length}</span><small>${delMes.length===1?"presupuesto hecho":"presupuestos hechos"}</small></div>
-      <div class="widget"><span class="ojo">${CHISPA} Respuestas</span>${anillo(pct,"var(--ok)")}<small>${decididos.length?"aceptados":"aún sin respuestas"}</small></div>
-    </div>
-    <section class="seccion"><h2>Mis presupuestos</h2><div class="tarjetas">${filas||'<p>Aún no hay presupuestos.</p>'}</div>${S.quotes.length>3?`<button class="btn" data-accion="todos">${V.todos?"Ver menos":"Ver todos ("+S.quotes.length+")"}</button>`:""}</section>
-    <button class="btn" data-accion="mano">Hacerlo a mano</button>
+  const linea2=esperando?`${esperando} ${esperando===1?"espera":"esperan"} respuesta`:S.quotes.some(q=>q.estado==="borrador")?"Tienes algo a medias":"Todo al día";
+  const hora=new Date().toTimeString().slice(0,5);
+  const titular=(S.negocio.titular||"").split(" ")[0];
+  return `<div class="wrap">${topApp()}<div class="saludo"><h1>${saludoHora()}${titular?", "+esc(titular):""}<span class="grad">${linea2}</span></h1></div></div>
+  <main class="wrap pila" style="padding-block:18px 112px">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
+    <section class="seccion" aria-label="Nuevo presupuesto">
+      <div class="compositor"><textarea id="dictado" rows="1" aria-label="Cuenta el trabajo" placeholder="Cuenta el trabajo">${esc(V.dictado)}</textarea>${SR?`<button class="mic ${voz?"oyendo":""}" data-mic="dictado" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Pulsa para hablar"}">${MIC_G}</button>`:""}</div>
+      <p class="dictado-ayuda" aria-live="polite">${voz?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Te escucho. Pulsa el micro para terminar':SR?"Pulsa el micro azul y cuéntalo":"Toca el recuadro y pulsa el micro del teclado"}</p>
+      <button class="btn pri" data-accion="preparar">Hacer presupuesto</button>
+      <div class="dos"><button class="btn" data-accion="mano">Hacerlo a mano</button><button class="btn" data-accion="ejemplo">Ver un ejemplo</button></div>
+    </section>
+    <section class="seccion"><div class="cabeza"><span class="ojo">${CHISPA} Resumen de hoy · ${hora}</span>${S.quotes.length>3?`<button data-accion="todos">${V.todos?"ver menos":`3 de ${S.quotes.length} · ver todos`}</button>`:""}</div>
+      <div class="tarjetas">${tarjetas||'<p>Aún no hay presupuestos.</p>'}</div></section>
   </main>${nav()}`;
 }
 const CANT={h:["hora","horas"],m:["metro","metros"],saco:["saco","sacos"],ud:["unidad","unidades"]};
@@ -523,8 +575,8 @@ function vEditor(){
     <label>Precio (€)<input id="l-p-${i}" data-c="precio" inputmode="decimal" value="${sin?"":esc(String(l.precio).replace(".",","))}"></label></div>
     <div class="dos"><button class="btn" data-cerrarl="1">Listo</button><button class="btn borrar" data-quitar="${i}">Quitar</button></div>`
     :`<button class="btn" data-editarl="${i}">Cambiar precio o nombre</button>`}</div>`}).join("");
-  return `<main class="wrap pila" style="padding-block:6px 128px"><button class="volver" data-go="inicio">← Volver</button>
-    <h1>${esc(q.titulo||"Nuevo presupuesto")}</h1>
+  return `<main class="wrap pila" style="padding-block:6px 128px"><div class="ficha-cab"><button class="volver chev" data-go="inicio" aria-label="Volver">‹</button><h1>${esc(q.cliente.nombre||"Nuevo presupuesto")}</h1><span class="tag ${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][0]}">${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][1]}</span></div>
+    ${q.lineas.length?`<div class="marco"><span class="ojo">${CHISPA} Resumen</span><ul><li>${esc(q.titulo||"Presupuesto")}</li><li>${q.lineas.length} ${q.lineas.length===1?"cosa incluida":"cosas incluidas"}${t.faltan?` · falta${t.faltan===1?"":"n"} ${t.faltan} precio${t.faltan===1?"":"s"}`:""}</li><li>${euros(t.total)} con IVA</li></ul></div>`:""}
     ${q.ejemplo?'<p class="aviso">Este presupuesto es de ejemplo.</p>':""}
     ${(q.dudas&&q.dudas.length)?`<div class="aviso warn"><b>Revisa esto:</b> ${q.dudas.map(esc).join(" · ")}</div>`:""}
     ${nota()}
@@ -576,15 +628,17 @@ function urlWA(q,enlace){
 function vVista(){
   const q=Q();if(!q){V.vista="inicio";return vInicio()}
   const t=totales(q);const bloqueado=t.faltan>0||!q.lineas.length;
-  return `<main class="wrap pila" style="padding-block:6px 32px"><button class="volver" data-accion="editar">← Volver a cambiarlo</button>
-  <h1>Así lo verá el cliente</h1>
+  return `<main class="wrap pila" style="padding-block:6px 32px"><button class="volver" data-accion="editar">‹ Volver a cambiarlo</button>
+  <h1 style="font-weight:500">Así lo verá ${esc(primerNombre(q))}</h1>
   ${bloqueado?`<p class="aviso warn">${q.lineas.length?`Falta ${t.faltan===1?"1 precio":t.faltan+" precios"}. Vuelve atrás y escríbelo.`:"Añade algo al presupuesto antes de enviarlo."}</p>`:""}
   ${nota()}
   ${hojaHTML(q)}
   <div class="pila" style="gap:10px">
-    <h2>Para enviarlo</h2>
-    ${conex?envioConEnlace(q,bloqueado):`<p>Pulsa el botón y elige WhatsApp. El PDF ya va adjunto.</p>
-    <button class="btn pri" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar por WhatsApp</button>`}
+    <div class="marco azul"><span class="ojo">${CHISPA} Mensaje listo · WhatsApp</span><p class="msg">${esc(mensajeWA(q,enlaceVigente(q)))}</p>
+      <div class="fila">${conex?(enlaceVigente(q)?`<a class="btn pri" href="${esc(urlWA(q,enlaceVigente(q)))}" target="_blank" rel="noopener" data-accion="wa">Enviar por WhatsApp</a>`:`<button class="btn pri" data-accion="enlace" ${bloqueado||V.creando?"disabled":""}>${V.creando?"Preparando…":"Preparar envío"}</button>`):`<button class="btn pri" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar por WhatsApp</button>`}<button class="btn" data-accion="editar">Cambiar</button></div>
+      ${conex&&!enlaceVigente(q)?'<small style="color:var(--muted)">Primero se sube el PDF a Drive y se añade el enlace al mensaje.</small>':""}
+    </div>
+    ${conex?`<button class="enlace" data-accion="enviar" ${bloqueado?"disabled":""}>Enviar con el PDF adjunto</button>`:""}
     <button class="enlace" data-accion="pdf" ${bloqueado?"disabled":""}>Guardar PDF en el móvil</button>
     <button class="enlace" data-accion="copiar">Copiar el mensaje</button>
   </div></main>`;
