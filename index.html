@@ -179,8 +179,8 @@ details[open]{padding-bottom:16px}
   .anima .widget,.anima .pres,.anima .chip{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
   .anima .chip:nth-child(2){animation-delay:.05s}
   .anima .widget:nth-child(1){animation-delay:.08s}.anima .widget:nth-child(2){animation-delay:.14s}
-  .anima .brief,.anima .saludo h1,.anima .compositor{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
-  .anima .compositor{animation-delay:.06s}.anima .brief:nth-child(1){animation-delay:.14s}.anima .brief:nth-child(2){animation-delay:.2s}.anima .brief:nth-child(3){animation-delay:.26s}
+  .anima .brief,.anima .saludo h1,.anima .caja{animation:sube .5s cubic-bezier(.2,.9,.3,1) both}
+  .anima .caja{animation-delay:.06s}.anima .brief:nth-child(1){animation-delay:.14s}.anima .brief:nth-child(2){animation-delay:.2s}.anima .brief:nth-child(3){animation-delay:.26s}
   .anima .pres:nth-child(1){animation-delay:.18s}.anima .pres:nth-child(2){animation-delay:.24s}.anima .pres:nth-child(3){animation-delay:.3s}
   @keyframes sube{from{opacity:0;transform:translateY(14px) scale(.98)}}
   .anima .barra i{animation:crece .7s cubic-bezier(.2,.9,.3,1) both;transform-origin:left}
@@ -246,6 +246,27 @@ details[open]{padding-bottom:16px}
 .compositor .mic{width:64px;height:64px;flex:none;box-shadow:none}
 .compositor .mic svg{width:30px;height:30px}
 .dictado-ayuda{text-align:center;color:var(--muted);font-weight:500;font-size:1rem}
+
+.caja{background:var(--card);border-radius:28px;box-shadow:inset 0 0 0 1.5px var(--line);padding:16px 12px 12px 20px;display:flex;flex-direction:column;gap:6px;transition:box-shadow .2s}
+.caja:focus-within{box-shadow:inset 0 0 0 2px var(--pri)}
+.caja.oyendo{box-shadow:inset 0 0 0 2px var(--bad)}
+.caja textarea{all:unset;box-sizing:border-box;width:100%;min-height:58px;font-size:1.2rem;line-height:1.4;color:var(--fg);white-space:pre-wrap;overflow-wrap:anywhere;padding-right:8px}
+.caja textarea::placeholder{color:var(--muted)}
+.caja-pie{display:flex;align-items:center;gap:8px}
+.caja-mas{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 14px 0 6px;border-radius:999px;color:var(--fg);font-weight:600}
+.caja-mas span{color:var(--muted)}
+.caja-mic{all:unset;cursor:pointer;margin-left:auto;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--fg)}
+.caja-mic svg{width:28px;height:28px}
+.caja-mic.on{background:var(--bad);color:#fff}
+.caja .onda{margin-left:auto}
+.caja .onda+.caja-mic{margin-left:0}
+.caja-ir{all:unset;cursor:pointer;width:60px;height:60px;border-radius:50%;background:var(--pri);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.caja-mas:focus-visible,.caja-mic:focus-visible,.caja-ir:focus-visible{outline:3px solid var(--pri);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){.caja-mas,.caja-mic,.caja-ir{transition:transform .22s cubic-bezier(.3,1.4,.5,1)}.caja-mas:active,.caja-mic:active,.caja-ir:active{transform:scale(.88);transition-duration:.08s}}
+.saludo{padding-block:22px 24px}
+.lista-tit{margin-bottom:-4px}
+.estado-linea{display:inline-flex;align-items:center;gap:8px;color:var(--pri-ink);font-weight:600;font-size:1.05rem}
+.estado-linea .punto{width:10px;height:10px;border-radius:50%;background:var(--pri)}
 </style>
 
 
@@ -486,6 +507,9 @@ function nuevoQ(datos={}){
 
 const LOGO=(t=38)=>`<svg width="${t}" height="${t}" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#2E6BF0"/><path d="M12 29 20 11l8 18" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.5 23.5h9" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg>`;
 const MIC_G=`<svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
+const MAS=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`;
+const FLECHA=`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+const PARAR=`<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="3" fill="currentColor"/></svg>`;
 const MIC=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>`;
 const ICON={inicio:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>',precios:'<path d="M12 3v18M17 7c-1-2-8-3-9 1s9 3 9 8-9 4-10 1"/>',negocio:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>'};
 const icono=k=>`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
@@ -548,15 +572,22 @@ function vInicio(){
   const linea2=esperando?`${esperando} ${esperando===1?"espera":"esperan"} respuesta`:S.quotes.some(q=>q.estado==="borrador")?"Tienes algo a medias":"Todo al día";
   const hora=new Date().toTimeString().slice(0,5);
   const titular=(S.negocio.titular||"").split(" ")[0];
-  return `<div class="wrap">${topApp()}<div class="saludo"><h1>${saludoHora()}${titular?", "+esc(titular):""}<span class="grad">${linea2}</span></h1></div></div>
+  return `<div class="wrap">${topApp()}<div class="saludo"><h1>${saludoHora()}${titular?", "+esc(titular):""}</h1></div></div>
   <main class="wrap pila" style="padding-block:18px 112px">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
     <section class="seccion" aria-label="Nuevo presupuesto">
-      <div class="compositor"><textarea id="dictado" rows="1" aria-label="Cuenta el trabajo" placeholder="Cuenta el trabajo">${esc(V.dictado)}</textarea>${SR?`<button class="mic ${voz?"oyendo":""}" data-mic="dictado" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Pulsa para hablar"}">${MIC_G}</button>`:""}</div>
-      <p class="dictado-ayuda" aria-live="polite">${voz?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Te escucho. Pulsa el micro para terminar':SR?"Pulsa el micro azul y cuéntalo":"Toca el recuadro y pulsa el micro del teclado"}</p>
-      <button class="btn pri" data-accion="preparar">Hacer presupuesto</button>
-      <div class="dos"><button class="btn" data-accion="mano">Hacerlo a mano</button><button class="btn" data-accion="ejemplo">Ver un ejemplo</button></div>
+      <div class="caja ${voz?"oyendo":""}">
+        <textarea id="dictado" rows="2" aria-label="Cuenta el trabajo" placeholder="${voz?"Te escucho…":"Cuenta el trabajo"}">${esc(V.dictado)}</textarea>
+        <div class="caja-pie">
+          <button class="caja-mas" data-accion="mano" aria-label="Hacerlo a mano">${MAS}<span>A mano</span></button>
+          ${voz?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>':""}
+          ${SR?`<button class="caja-mic ${voz?"on":""}" data-mic="dictado" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Hablar"}">${voz?PARAR:MIC}</button>`:""}
+          <button class="caja-ir" data-accion="preparar" aria-label="Hacer presupuesto">${FLECHA}</button>
+        </div>
+      </div>
+      <p class="dictado-ayuda" aria-live="polite">${voz?"Te escucho. Pulsa el cuadrado rojo para terminar":SR?"Pulsa el micro, cuéntalo y luego la flecha azul":"Pulsa el micro del teclado, cuéntalo y luego la flecha azul"}</p>
+      <button class="enlace" style="padding:2px 4px;align-self:center" data-accion="ejemplo">Ver un ejemplo</button>
     </section>
-    <section class="seccion"><div class="cabeza"><span class="ojo">${CHISPA} Resumen de hoy · ${hora}</span>${S.quotes.length>3?`<button data-accion="todos">${V.todos?"ver menos":`3 de ${S.quotes.length} · ver todos`}</button>`:""}</div>
+    <section class="seccion"><h2 class="lista-tit">Mis presupuestos</h2><div class="cabeza"><span class="estado-linea">${esperando?'<span class="punto"></span>':''}${linea2}</span>${S.quotes.length>3?`<button data-accion="todos">${V.todos?"ver menos":`3 de ${S.quotes.length} · ver todos`}</button>`:""}</div>
       <div class="tarjetas">${tarjetas||'<p>Aún no hay presupuestos.</p>'}</div></section>
   </main>${nav()}`;
 }
