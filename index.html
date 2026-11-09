@@ -697,9 +697,9 @@ function vInicio(){
       <p class="dictado-ayuda" aria-live="polite">${voz?"Te escucho. Pulsa el cuadrado rojo para terminar":SR?"Pulsa el micro y cuéntalo. Luego, la flecha":"Usa el micro del teclado. Luego, la flecha"}</p>
     </section>
     <section class="seccion">
-      <button class="seccion-link" data-go="lista"><h2>Mis presupuestos</h2><span>Ver todos${CHEV}</span></button>
+      <h2>Mis presupuestos</h2>
       <span class="estado-linea">${esperando?'<span class="punto"></span>':""}${linea2}</span>
-      ${lista.length?`<div class="lista-ios">${lista.slice(0,3).map(filaPres).join("")}${lista.length>3?`<button class="fila fila-mas" data-go="lista"><span>Ver los ${lista.length}</span>${CHEV}</button>`:""}</div>`:'<p class="vacio">Aún no hay presupuestos. Cuenta tu primer trabajo arriba.</p>'}
+      ${lista.length?`<div class="lista-ios">${lista.slice(0,3).map(filaPres).join("")}<button class="fila fila-mas" data-go="lista"><span>Ver todos</span>${CHEV}</button></div>`:'<p class="vacio">Aún no hay presupuestos. Cuenta tu primer trabajo arriba.</p>'}
     </section>
   </main>${nav()}`;
 }
