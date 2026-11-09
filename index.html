@@ -267,6 +267,48 @@ details[open]{padding-bottom:16px}
 .lista-tit{margin-bottom:-4px}
 .estado-linea{display:inline-flex;align-items:center;gap:8px;color:var(--pri-ink);font-weight:600;font-size:1.05rem}
 .estado-linea .punto{width:10px;height:10px;border-radius:50%;background:var(--pri)}
+
+/* Espaciado: escala 4·8·12·16·24·32·48, margen lateral 20 */
+:root{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px}
+.wrap{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.top-app{padding-block:var(--s3) 0;min-height:64px}
+.saludo{padding-block:var(--s6) var(--s6);border-bottom:0}
+.saludo h1{font-size:2.3rem}
+main{padding-block:0 128px}
+.pila{gap:var(--s6)}
+.seccion{gap:var(--s4)}
+.seccion>h2,.lista-tit{margin:0}
+.lista-tit+.cabeza{margin-top:calc(-1 * var(--s2))}
+.cabeza{min-height:28px}
+.tarjetas{gap:var(--s3)}
+.brief{padding:var(--s5) 20px 20px;gap:var(--s2);border-radius:22px}
+.brief .tag{margin-bottom:var(--s1)}
+.brief small{margin-top:calc(-1 * var(--s1))}
+.brief .btn{margin-top:var(--s3)}
+.caja{padding:var(--s4) var(--s3) var(--s3) 20px}
+.dictado-ayuda{margin-top:calc(-1 * var(--s1))}
+.pagina-cab{display:flex;flex-direction:column;gap:var(--s2);padding-block:var(--s6) var(--s6)}
+.pagina-cab h1{font-size:2.3rem;font-weight:500}
+.pagina-cab p{color:var(--muted)}
+label{gap:var(--s2)}
+.ficha-cab{padding-top:var(--s4);gap:var(--s3)}
+.volver{min-height:52px}
+.marco{padding:20px;gap:var(--s2);border-radius:22px}
+.marco ul{gap:var(--s2)}
+.linea{padding:20px;gap:var(--s4);border-radius:22px}
+.linea .t{gap:var(--s4)}
+.linea [data-editarl]{min-height:52px;font-size:1rem;background:var(--sunken);box-shadow:none}
+.pasador{gap:var(--s3)}
+.estado{gap:var(--s2)}
+details{padding:0 20px;border-radius:22px}
+details[open]{padding-bottom:20px}
+.precio{padding-block:var(--s3);gap:var(--s4)}
+.cat{padding-top:var(--s5);padding-bottom:var(--s1)}
+.hoja{padding:var(--s5) 20px}
+.total-in{padding-block:var(--s3);gap:var(--s4)}
+.aviso{padding:var(--s4) 20px}
+.dos{gap:var(--s3)}
+.sheet{padding-top:var(--s5);gap:var(--s4)}
 </style>
 
 
@@ -562,6 +604,18 @@ function recordatorioWA(q){
   let d=String(q.cliente.telefono||"").replace(/\D/g,"");if(d.length===9)d="34"+d;
   return "https://wa.me/"+d+"?text="+encodeURIComponent(`Hola ${primerNombre(q)}, soy ${S.negocio.titular||"Alcolea"}. ¿Has podido mirar el presupuesto ${q.num}${q.titulo?" de "+q.titulo.toLowerCase():""}? Cualquier duda, me dices.`);
 }
+function cajaVoz(id,valor,ph,accion,etq,conMano){
+  const oye=voz&&vozId===id;
+  return `<div class="caja ${oye?"oyendo":""}">
+        <textarea id="${id}" rows="2" aria-label="${ph}" placeholder="${oye?"Te escucho…":ph}">${esc(valor)}</textarea>
+        <div class="caja-pie">
+          ${conMano?`<button class="caja-mas" data-accion="mano" aria-label="Hacerlo a mano">${MAS}<span>A mano</span></button>`:""}
+          ${oye?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>':""}
+          ${SR?`<button class="caja-mic ${oye?"on":""}" data-mic="${id}" aria-pressed="${oye}" aria-label="${oye?"Parar de escuchar":"Hablar"}">${oye?PARAR:MIC}</button>`:""}
+          <button class="caja-ir" data-accion="${accion}" aria-label="${etq}">${FLECHA}</button>
+        </div>
+      </div>`;
+}
 function topApp(){return `<div class="top-app">${LOGO(40)}<span class="nombre">Alcolea</span><button class="yo" data-go="negocio" aria-label="Mis datos">${icono("negocio")}</button></div>`}
 function vInicio(){
   const orden={enviado:0,borrador:1,aceptado:2,rechazado:3};
@@ -573,18 +627,10 @@ function vInicio(){
   const hora=new Date().toTimeString().slice(0,5);
   const titular=(S.negocio.titular||"").split(" ")[0];
   return `<div class="wrap">${topApp()}<div class="saludo"><h1>${saludoHora()}${titular?", "+esc(titular):""}</h1></div></div>
-  <main class="wrap pila" style="padding-block:18px 112px">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
+  <main class="wrap pila">${nota()}${driveFalla?'<p class="aviso warn">Sin conexión con Google Drive. Tus presupuestos están en este móvil y se subirán luego.</p>':""}
     <section class="seccion" aria-label="Nuevo presupuesto">
-      <div class="caja ${voz?"oyendo":""}">
-        <textarea id="dictado" rows="2" aria-label="Cuenta el trabajo" placeholder="${voz?"Te escucho…":"Cuenta el trabajo"}">${esc(V.dictado)}</textarea>
-        <div class="caja-pie">
-          <button class="caja-mas" data-accion="mano" aria-label="Hacerlo a mano">${MAS}<span>A mano</span></button>
-          ${voz?'<span class="onda" aria-hidden="true"><i></i><i></i><i></i><i></i></span>':""}
-          ${SR?`<button class="caja-mic ${voz?"on":""}" data-mic="dictado" aria-pressed="${!!voz}" aria-label="${voz?"Parar de escuchar":"Hablar"}">${voz?PARAR:MIC}</button>`:""}
-          <button class="caja-ir" data-accion="preparar" aria-label="Hacer presupuesto">${FLECHA}</button>
-        </div>
-      </div>
-      <p class="dictado-ayuda" aria-live="polite">${voz?"Te escucho. Pulsa el cuadrado rojo para terminar":SR?"Pulsa el micro, cuéntalo y luego la flecha azul":"Pulsa el micro del teclado, cuéntalo y luego la flecha azul"}</p>
+      ${cajaVoz("dictado",V.dictado,"Cuenta el trabajo","preparar","Hacer presupuesto",true)}
+      <p class="dictado-ayuda" aria-live="polite">${voz?"Te escucho. Pulsa el cuadrado rojo para terminar":SR?"Pulsa el micro y cuéntalo. Luego, la flecha":"Usa el micro del teclado. Luego, la flecha"}</p>
       <button class="enlace" style="padding:2px 4px;align-self:center" data-accion="ejemplo">Ver un ejemplo</button>
     </section>
     <section class="seccion"><h2 class="lista-tit">Mis presupuestos</h2><div class="cabeza"><span class="estado-linea">${esperando?'<span class="punto"></span>':''}${linea2}</span>${S.quotes.length>3?`<button data-accion="todos">${V.todos?"ver menos":`3 de ${S.quotes.length} · ver todos`}</button>`:""}</div>
@@ -606,7 +652,7 @@ function vEditor(){
     <label>Precio (€)<input id="l-p-${i}" data-c="precio" inputmode="decimal" value="${sin?"":esc(String(l.precio).replace(".",","))}"></label></div>
     <div class="dos"><button class="btn" data-cerrarl="1">Listo</button><button class="btn borrar" data-quitar="${i}">Quitar</button></div>`
     :`<button class="btn" data-editarl="${i}">Cambiar precio o nombre</button>`}</div>`}).join("");
-  return `<main class="wrap pila" style="padding-block:6px 128px"><div class="ficha-cab"><button class="volver chev" data-go="inicio" aria-label="Volver">‹</button><h1>${esc(q.cliente.nombre||"Nuevo presupuesto")}</h1><span class="tag ${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][0]}">${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][1]}</span></div>
+  return `<main class="wrap pila" style="padding-bottom:136px"><div class="ficha-cab"><button class="volver chev" data-go="inicio" aria-label="Volver">‹</button><h1>${esc(q.cliente.nombre||"Nuevo presupuesto")}</h1><span class="tag ${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][0]}">${{borrador:["azul","Borrador"],enviado:["amarillo","Enviado"],aceptado:["verde","Aceptado"],rechazado:["gris","Rechazado"]}[q.estado][1]}</span></div>
     ${q.lineas.length?`<div class="marco"><span class="ojo">${CHISPA} Resumen</span><ul><li>${esc(q.titulo||"Presupuesto")}</li><li>${q.lineas.length} ${q.lineas.length===1?"cosa incluida":"cosas incluidas"}${t.faltan?` · falta${t.faltan===1?"":"n"} ${t.faltan} precio${t.faltan===1?"":"s"}`:""}</li><li>${euros(t.total)} con IVA</li></ul></div>`:""}
     ${q.ejemplo?'<p class="aviso">Este presupuesto es de ejemplo.</p>':""}
     ${(q.dudas&&q.dudas.length)?`<div class="aviso warn"><b>Revisa esto:</b> ${q.dudas.map(esc).join(" · ")}</div>`:""}
@@ -659,8 +705,7 @@ function urlWA(q,enlace){
 function vVista(){
   const q=Q();if(!q){V.vista="inicio";return vInicio()}
   const t=totales(q);const bloqueado=t.faltan>0||!q.lineas.length;
-  return `<main class="wrap pila" style="padding-block:6px 32px"><button class="volver" data-accion="editar">‹ Volver a cambiarlo</button>
-  <h1 style="font-weight:500">Así lo verá ${esc(primerNombre(q))}</h1>
+  return `<main class="wrap pila" style="padding-bottom:var(--s7)"><header class="pagina-cab" style="padding-block:var(--s2) 0"><button class="volver" style="align-self:flex-start" data-accion="editar">‹ Volver a cambiarlo</button><h1>Así lo verá ${esc(primerNombre(q))}</h1></header>
   ${bloqueado?`<p class="aviso warn">${q.lineas.length?`Falta ${t.faltan===1?"1 precio":t.faltan+" precios"}. Vuelve atrás y escríbelo.`:"Añade algo al presupuesto antes de enviarlo."}</p>`:""}
   ${nota()}
   ${hojaHTML(q)}
@@ -710,12 +755,11 @@ function vPrecios(){
   const trabajos=S.trabajos.filter(t=>!b||norm(t.nombre).includes(b)).map(t=>`<details><summary><span>${esc(t.nombre)}</span><span class="num" id="pt-${t.id}">${euros(precioTrabajo(t))}</span></summary>
     ${t.comp.map(([id,c],k)=>{const i=S.catalogo.find(x=>x.id===id);return i?`<div class="comp"><span>${esc(i.nombre)}</span><input id="tc-${t.id}-${k}" aria-label="Cantidad de ${esc(i.nombre)}" data-tcomp="${t.id}" data-k="${k}" inputmode="decimal" value="${esc(String(c).replace(".",","))}"></div>`:""}).join("")}
     </details>`).join("");
-  return `<div class="hero"><div class="wrap hero-in">${marca()}<h1>Mis precios</h1>
-    ${botonMic("precios-voz")}
-    <textarea id="precios-voz" style="min-height:96px" aria-label="Lo que has dicho" placeholder="Por ejemplo: la hora a 38 euros">${esc(V.preciosTexto)}</textarea>
-    <button class="btn pri " data-accion="interpretarP" >Cambiar precios</button>
+  return `<div class="wrap">${topApp()}<header class="pagina-cab"><h1>Mis precios</h1><p>Di qué precio cambia o escríbelo abajo en la lista.</p></header></div><main class="wrap pila">
+   <section class="seccion">
+    ${cajaVoz("precios-voz",V.preciosTexto,"Por ejemplo: la hora a 38 euros","interpretarP","Cambiar precios",false)}
     ${propH}${nota()}
-  </div></div><main class="wrap pila">
+   </section>
    <p class="aviso warn">Estos precios son inventados. Hay que cambiarlos por los reales.</p>
    <label>Buscar un precio<input id="p-buscar" value="${esc(V.buscar)}"></label>
    <section class="seccion"><h2>Lista de precios</h2><div>${grupos||'<p>No hay nada con ese nombre.</p>'}</div></section>
@@ -725,7 +769,7 @@ function vPrecios(){
 function vNegocio(){
   const n=S.negocio;
   const c=(k,t,x="")=>`<label>${t}<input id="n-${k}" data-neg="${k}" value="${esc(n[k])}" ${x}></label>`;
-  return `<div class="hero"><div class="wrap hero-in">${marca()}<h1>Mis datos</h1><p>Esto sale en los presupuestos que envías.</p></div></div><main class="wrap pila">
+  return `<div class="wrap">${topApp()}<header class="pagina-cab"><h1>Mis datos</h1><p>Esto sale en los presupuestos que envías.</p></header></div><main class="wrap pila">
    <section class="seccion">
     ${c("titular","Tu nombre")}${c("nombre","Nombre del negocio")}${c("telefono","Teléfono",'inputmode="tel"')}${c("nif","NIF")}
    </section>
@@ -766,7 +810,7 @@ function interpretarP(){
   render();
 }
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let voz=null;
+let voz=null,vozId=null;
 function escuchar(id){
   if(voz){pararVoz(false);return}
   const ta=document.getElementById(id);if(!ta||!SR)return;
@@ -779,7 +823,7 @@ function escuchar(id){
     if(m&&e.error!=="aborted")V.nota={t:m,tipo:"warn"};
   };
   rec.onend=()=>{voz=null;render()};
-  try{rec.start();voz=rec;V.nota=null;render()}catch(e){voz=null;V.nota={t:"No se ha podido usar el micrófono. Prueba otra vez.",tipo:"warn"};render()}
+  try{rec.start();voz=rec;vozId=id;V.nota=null;render()}catch(e){voz=null;V.nota={t:"No se ha podido usar el micrófono. Prueba otra vez.",tipo:"warn"};render()}
 }
 function pararVoz(cortar){if(voz){const r=voz;voz=null;if(cortar)r.onresult=null;try{r.stop()}catch(e){}}}
 function botonMic(id){
